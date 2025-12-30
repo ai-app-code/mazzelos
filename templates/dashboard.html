@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Mazzel OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ========== LIGHT THEME ========== */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --bg-input: #f1f5f9;
+            --bg-sidebar: #ffffff;
+            --border-color: #e2e8f0;
+            --border-hover: #8b5cf6;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --accent: #8b5cf6;
+            --accent-secondary: #a855f7;
+            --accent-light: rgba(139, 92, 246, 0.1);
+            --accent-glow: rgba(139, 92, 246, 0.25);
+            --success: #22c55e;
+            --success-light: rgba(34, 197, 94, 0.1);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.1);
+        }
+
+        /* ========== DARK THEME ========== */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: #16161f;
+            --bg-card-hover: #1e1e2a;
+            --bg-input: #1e1e2a;
+            --bg-sidebar: #0d0d14;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Ocean Themes */
+        [data-theme="ocean"] {
+            --bg-primary: #ecfeff;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #cffafe;
+            --bg-input: #cffafe;
+            --bg-sidebar: #f0fdfa;
+            --border-color: #a5f3fc;
+            --accent: #0891b2;
+            --accent-secondary: #06b6d4;
+            --accent-light: rgba(8, 145, 178, 0.15);
+            --accent-glow: rgba(8, 145, 178, 0.3);
+        }
+
+        [data-theme="ocean-dark"] {
+            --bg-primary: #042f2e;
+            --bg-secondary: #0a3d3c;
+            --bg-card: #0d4f4e;
+            --bg-card-hover: #115e5d;
+            --bg-input: #115e5d;
+            --bg-sidebar: #032524;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent: #06b6d4;
+            --accent-secondary: #22d3ee;
+            --accent-light: rgba(6, 182, 212, 0.2);
+        }
+
+        /* Rose Themes */
+        [data-theme="rose"] {
+            --bg-primary: #fff1f2;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #ffe4e6;
+            --bg-input: #ffe4e6;
+            --bg-sidebar: #fff5f6;
+            --border-color: #fecdd3;
+            --accent: #e11d48;
+            --accent-secondary: #f43f5e;
+            --accent-light: rgba(225, 29, 72, 0.15);
+            --accent-glow: rgba(225, 29, 72, 0.3);
+        }
+
+        [data-theme="rose-dark"] {
+            --bg-primary: #1a0a0d;
+            --bg-secondary: #2a1015;
+            --bg-card: #3a151c;
+            --bg-card-hover: #4a1a23;
+            --bg-input: #4a1a23;
+            --bg-sidebar: #150809;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent: #f43f5e;
+            --accent-secondary: #fb7185;
+            --accent-light: rgba(244, 63, 94, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .logo-box {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .logo-box i {
+            font-size: 18px;
+            color: white;
+        }
+
+        .logo-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo-version {
+            font-size: 10px;
+            padding: 4px 8px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .nav-section {
+            margin-bottom: 28px;
+        }
+
+        .nav-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            padding-left: 12px;
+            font-weight: 700;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .nav-badge.new {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .nav-badge.soon {
+            background: var(--bg-input);
+            color: var(--text-muted);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 16px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            color: var(--danger);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 32px 40px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .header-left {}
+
+        .welcome-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Theme Toggle */
+        .theme-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .theme-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .theme-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .theme-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-btn.active {
+            border-color: var(--accent);
+        }
+
+        .theme-btn.light {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .theme-btn.dark {
+            background: #1e1e2a;
+            color: #fff;
+        }
+
+        .color-btns {
+            display: flex;
+            gap: 4px;
+            margin-left: 8px;
+            padding-left: 8px;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .color-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .color-btn.active {
+            border-color: var(--text-primary);
+        }
+
+        .color-btn.purple {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        }
+
+        .color-btn.ocean {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+        }
+
+        .color-btn.rose {
+            background: linear-gradient(135deg, #e11d48, #f43f5e);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 24px;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--accent-light);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon i {
+            font-size: 22px;
+            color: var(--accent);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Section */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Module Cards */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .module-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .module-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .module-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-light);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            transition: all 0.3s;
+        }
+
+        .module-card:hover .module-icon {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        }
+
+        .module-icon i {
+            font-size: 26px;
+            color: var(--accent);
+            transition: color 0.3s;
+        }
+
+        .module-card:hover .module-icon i {
+            color: white;
+        }
+
+        .module-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .module-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .module-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .module-status.active {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .module-status.dev {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .module-status.soon {
+            background: var(--bg-input);
+            color: var(--text-muted);
+        }
+
+        .module-status i {
+            font-size: 8px;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast.success .toast-icon {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .toast.info .toast-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modules-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-box"><i class="fas fa-bolt"></i></div>
+            <span class="logo-title">MAZZEL OS</span>
+            <span class="logo-version">v1.0</span>
+        </div>
+
+        <nav class="nav-section">
+            <div class="nav-title">Ana Menü</div>
+            <a href="/dashboard" class="nav-item active"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="/teklif/" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Teklif Hazırla <span
+                    class="nav-badge new">Yeni</span></a>
+            <a href="/mail/" class="nav-item"><i class="fas fa-envelope"></i> Mazzel Mail</a>
+            <a href="/maliyet/" class="nav-item"><i class="fas fa-calculator"></i> Maliyet Hesapla <span
+                    class="nav-badge soon">Yakında</span></a>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-title">Yönetim</div>
+            <a href="/settings" class="nav-item"><i class="fas fa-cog"></i> Ayarlar</a>
+            <a href="/musteriler/" class="nav-item"><i class="fas fa-users"></i> Kullanıcılar</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">{{ user[0]|upper }}</div>
+                <div>
+                    <div class="user-name">{{ user }}</div>
+                    <div class="user-role">Yönetici</div>
+                </div>
+            </div>
+            <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="page-header">
+            <div class="header-left">
+                <div class="welcome-text">Hoş geldin, {{ user }}! 👋</div>
+                <h1 class="page-title">Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="theme-group">
+                    <span class="theme-label">Tema:</span>
+                    <div class="theme-toggle">
+                        <button class="theme-btn light active" onclick="setMode('light')" title="Açık"><i
+                                class="fas fa-sun"></i></button>
+                        <button class="theme-btn dark" onclick="setMode('dark')" title="Koyu"><i
+                                class="fas fa-moon"></i></button>
+                    </div>
+                    <div class="color-btns">
+                        <button class="color-btn purple active" onclick="setColor('purple')"></button>
+                        <button class="color-btn ocean" onclick="setColor('ocean')"></button>
+                        <button class="color-btn rose" onclick="setColor('rose')"></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-value">24</div>
+                <div class="stat-label">Toplam Teklif</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value">18</div>
+                <div class="stat-label">Onaylanan</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-value">4</div>
+                <div class="stat-label">Bekleyen</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+                <div class="stat-value">€12.4K</div>
+                <div class="stat-label">Bu Ay Gelir</div>
+            </div>
+        </div>
+
+        <!-- Modules -->
+        <div class="section-header">
+            <h2 class="section-title">Modüller</h2>
+        </div>
+
+        <div class="modules-grid">
+            <a href="/teklif/" class="module-card">
+                <div class="module-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <h3 class="module-title">Teklif Hazırlama</h3>
+                <p class="module-desc">Cami, karavan ve ahşap işleri için profesyonel teklif oluşturun.</p>
+                <span class="module-status active"><i class="fas fa-circle"></i> Aktif</span>
+            </a>
+
+            <a href="/mail/" class="module-card">
+                <div class="module-icon"><i class="fas fa-envelope-open-text"></i></div>
+                <h3 class="module-title">Mazzel Mail</h3>
+                <p class="module-desc">Müşterilere PDF teklif gönderimi ve takibi yapın.</p>
+                <span class="module-status dev"><i class="fas fa-circle"></i> Geliştiriliyor</span>
+            </a>
+
+            <a href="/maliyet/" class="module-card">
+                <div class="module-icon"><i class="fas fa-th"></i></div>
+                <h3 class="module-title">Maliyet & Nesting</h3>
+                <p class="module-desc">MDF plaka yerleşimi ve fire hesabı optimize edin.</p>
+                <span class="module-status soon"><i class="fas fa-circle"></i> Yakında</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        let currentMode = 'light';
+        let currentColor = 'purple';
+
+        function setMode(mode) {
+            currentMode = mode;
+            applyTheme();
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.theme-btn.${mode}`).classList.add('active');
+            localStorage.setItem('themeMode', mode);
+            showToast('success', 'Tema', mode === 'light' ? 'Açık tema uygulandı' : 'Koyu tema uygulandı');
+        }
+
+        function setColor(color) {
+            currentColor = color;
+            applyTheme();
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.color-btn.${color}`).classList.add('active');
+            localStorage.setItem('themeColor', color);
+        }
+
+        function applyTheme() {
+            let theme = currentMode;
+            if (currentColor !== 'purple') {
+                theme = currentMode === 'dark' ? `${currentColor}-dark` : currentColor;
+            }
+            document.body.setAttribute('data-theme', theme);
+        }
+
+        const savedMode = localStorage.getItem('themeMode') || 'light';
+        const savedColor = localStorage.getItem('themeColor') || 'purple';
+        currentMode = savedMode;
+        currentColor = savedColor;
+        applyTheme();
+        document.querySelector(`.theme-btn.${savedMode}`)?.classList.add('active');
+        document.querySelector(`.color-btn.${savedColor}`)?.classList.add('active');
+        document.querySelector(`.theme-btn:not(.${savedMode})`)?.classList.remove('active');
+
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { success: 'fa-check', info: 'fa-info' };
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas ${icons[type]}"></i></div>
+                <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+                <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+    </script>
+</body>
+
+</html>
