@@ -1,0 +1,2081 @@
+{% extends "base.html" %}
+
+{% block title %}Nesting & Kesim | Mazzel OS{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Main Layout */
+    .nesting-page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Tab Navigation */
+    .mode-tabs {
+        display: flex;
+        gap: 8px;
+        background: var(--bg-card);
+        padding: 8px;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        width: fit-content;
+    }
+
+    .mode-tab {
+        padding: 12px 28px;
+        background: transparent;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mode-tab:hover {
+        background: var(--bg-input);
+    }
+
+    .mode-tab.active {
+        background: var(--accent);
+        color: white;
+    }
+
+    .mode-tab i {
+        font-size: 16px;
+    }
+
+    /* Content Panels */
+    .mode-content {
+        display: none;
+    }
+
+    .mode-content.active {
+        display: block;
+    }
+
+    /* Panelsaw Layout */
+    .panelsaw-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* Top Bar: Project Info + Settings */
+    .top-bar {
+        display: flex;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .project-info {
+        flex: 1;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .project-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .project-field label {
+        font-size: 10px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .project-field input,
+    .project-field select {
+        padding: 10px 14px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 14px;
+        min-width: 200px;
+    }
+
+    /* Settings Accordion */
+    .settings-toggle {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        min-width: 320px;
+    }
+
+    .settings-toggle-btn {
+        width: 100%;
+        padding: 16px 20px;
+        background: none;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .settings-toggle-btn i.arrow {
+        transition: transform 0.3s;
+    }
+
+    .settings-toggle.open .settings-toggle-btn i.arrow {
+        transform: rotate(180deg);
+    }
+
+    .settings-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .settings-toggle.open .settings-content {
+        max-height: 400px;
+    }
+
+    .settings-inner {
+        padding: 0 20px 20px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .setting-group {
+        background: var(--bg-input);
+        border-radius: 12px;
+        padding: 14px;
+    }
+
+    .setting-group-title {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .setting-row {
+        display: flex;
+        gap: 8px;
+    }
+
+    .setting-item {
+        flex: 1;
+    }
+
+    .setting-item label {
+        font-size: 10px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .setting-item input,
+    .setting-item select {
+        width: 100%;
+        padding: 8px 10px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        color: var(--text-primary);
+        font-size: 13px;
+    }
+
+    /* Materials Section */
+    .materials-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .materials-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-input);
+    }
+
+    .materials-header h2 {
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .materials-header h2 i {
+        color: var(--accent);
+    }
+
+    .materials-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .materials-body {
+        padding: 24px;
+    }
+
+    /* Material Card */
+    .material-card {
+        background: var(--bg-input);
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        transition: all 0.2s;
+    }
+
+    .material-card:hover {
+        border-color: var(--accent);
+    }
+
+    .material-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .material-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .material-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--accent);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+    }
+
+    .material-name {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--text-primary);
+    }
+
+    .material-size {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .material-remove {
+        padding: 8px 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .material-remove:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    /* Parts Table */
+    .parts-table-wrapper {
+        padding: 16px 20px;
+    }
+
+    .parts-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .parts-table thead th {
+        text-align: left;
+        padding: 12px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .parts-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+    }
+
+    .parts-table tbody tr:hover {
+        background: rgba(139, 92, 246, 0.05);
+    }
+
+    .parts-table tbody td {
+        padding: 10px 8px;
+    }
+
+    .parts-table input[type="text"],
+    .parts-table input[type="number"] {
+        width: 100%;
+        padding: 10px 12px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .parts-table input[type="text"]:hover,
+    .parts-table input[type="number"]:hover {
+        border-color: var(--accent);
+    }
+
+    .parts-table input[type="text"]:focus,
+    .parts-table input[type="number"]:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: var(--bg-card);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    .parts-table input.num {
+        text-align: center;
+        max-width: 80px;
+    }
+
+    /* Pattern Toggle - Minimal */
+    .pattern-toggle {
+        width: 36px;
+        height: 20px;
+        background: var(--border-color);
+        border-radius: 10px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .pattern-toggle::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .pattern-toggle.active {
+        background: var(--accent);
+    }
+
+    .pattern-toggle.active::after {
+        transform: translateX(16px);
+    }
+
+
+    /* Edge Banding - Compact & Hover Menu */
+    .edge-selector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        position: relative;
+    }
+
+    .edge-menu-trigger {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .edge-menu-trigger:hover {
+        background: var(--bg-input);
+        color: var(--accent);
+    }
+
+    .edge-presets-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 4px;
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        z-index: 10;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 120px;
+    }
+
+    .edge-selector:hover .edge-presets-dropdown {
+        display: flex;
+    }
+
+    .edge-preset-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 11px;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+    }
+
+    .edge-preset-item:hover {
+        background: var(--bg-input);
+        color: var(--accent);
+    }
+
+    .edge-preset-item i {
+        width: 14px;
+        text-align: center;
+    }
+
+    .edge-btns {
+        display: flex;
+        gap: 2px;
+    }
+
+    .edge-btn {
+        width: 24px;
+        height: 24px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--bg-card);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: var(--text-muted);
+        transition: all 0.2s;
+    }
+
+    .edge-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .edge-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
+    /* Pattern Toggle */
+    .pattern-cell {
+        border-left: 1px solid var(--border-color);
+        padding-left: 8px !important;
+    }
+
+    /* Module Card Styles - Modern Redesign */
+    .module-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+        border-bottom: 1px solid var(--border-color);
+        flex-wrap: wrap;
+    }
+
+    .module-title-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 0 0 auto;
+    }
+
+    .module-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .module-name-input {
+        background: transparent;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        padding: 4px 0;
+        width: 100px;
+        min-width: 80px;
+    }
+
+    .module-name-input:focus {
+        outline: none;
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .module-type-badge {
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 4px 10px;
+        font-size: 11px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .module-type-badge:hover {
+        border-color: var(--accent);
+    }
+
+    .module-materials {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-left: auto;
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .material-selector {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .material-selector label {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .material-selector select {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 11px;
+        color: var(--text-primary);
+        min-width: 120px;
+        max-width: 160px;
+        cursor: pointer;
+    }
+
+    .material-selector select:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    .module-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 12px;
+        opacity: 0.3;
+        transition: opacity 0.2s;
+    }
+
+    .module-header:hover .module-actions {
+        opacity: 1;
+    }
+
+    /* Part Material Dropdown */
+    .part-material {
+        width: 100%;
+        padding: 6px 8px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 11px;
+        color: var(--text-primary);
+    }
+
+    .part-material:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    /* Part Material Dropdown */
+    .part-material {
+        width: 100%;
+        padding: 6px 8px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 11px;
+        color: var(--text-primary);
+    }
+
+    .part-material:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    .delete-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 6px;
+    }
+
+    .delete-btn:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    .add-part-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px;
+        margin-top: 12px;
+        background: transparent;
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        color: var(--text-muted);
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .add-part-row:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-light);
+    }
+
+    /* Action Bar */
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background: var(--bg-input);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .stats-preview {
+        display: flex;
+        gap: 24px;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .action-btns {
+        display: flex;
+        gap: 12px;
+    }
+
+    /* Results Section */
+    .results-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        overflow: hidden;
+        display: none;
+    }
+
+    .results-section.show {
+        display: block;
+    }
+
+    .results-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-input);
+    }
+
+    .results-stats {
+        display: flex;
+        gap: 16px;
+    }
+
+    .result-stat {
+        background: var(--bg-card);
+        padding: 12px 24px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+    }
+
+    .result-stat .value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .result-stat .value.success {
+        color: var(--success);
+    }
+
+    .result-stat .label {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        padding: 24px;
+    }
+
+    .sheet-card {
+        background: var(--bg-input);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .sheet-card-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sheet-card-header h4 {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .sheet-card-header span {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .sheet-canvas-wrap {
+        padding: 12px;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+    }
+
+    [data-theme="dark"] .sheet-canvas-wrap {
+        background: #1a1a2e;
+    }
+
+    /* Sheet Card New Styles */
+    .sheet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .sheet-title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text-primary);
+    }
+
+    .sheet-info {
+        font-size: 12px;
+        color: var(--text-muted);
+        background: var(--bg-card);
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    .sheet-card svg {
+        display: block;
+        margin: 12px auto;
+    }
+
+    .sheet-legend {
+        padding: 10px 16px;
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .legend-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--text-secondary);
+    }
+
+    .legend-item {
+        background: var(--bg-input);
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+
+    /* Global Legend */
+    .global-legend {
+        grid-column: 1 / -1;
+        background: var(--bg-input);
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin-top: 10px;
+    }
+
+    .legend-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+        text-transform: uppercase;
+    }
+
+    .legend-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .legend-entry {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .legend-color.waste-pattern {
+        background: repeating-linear-gradient(45deg,
+                #fef2f2,
+                #fef2f2 5px,
+                #ef4444 5px,
+                #ef4444 6px);
+    }
+
+    /* Part hover effect */
+    .part-group:hover rect:first-child {
+        filter: brightness(1.1);
+    }
+
+    /* Success/Warning/Danger for efficiency */
+    .result-stat .value.warning {
+        color: #F59E0B;
+    }
+
+    .result-stat .value.danger {
+        color: #EF4444;
+    }
+
+    /* CNC Section */
+    .cnc-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        overflow: hidden;
+        min-height: 700px;
+    }
+
+    .cnc-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-input);
+    }
+
+    .cnc-header h2 {
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .cnc-header p {
+        color: var(--text-muted);
+        font-size: 13px;
+    }
+
+    .cnc-frame {
+        width: 100%;
+        height: 650px;
+        border: none;
+    }
+
+    /* Material Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-box {
+        background: var(--bg-card);
+        border-radius: 20px;
+        width: 500px;
+        max-width: 90vw;
+        max-height: 80vh;
+        overflow: hidden;
+        transform: scale(0.9);
+        transition: transform 0.3s;
+    }
+
+    .modal-overlay.show .modal-box {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    .modal-close:hover {
+        background: var(--bg-input);
+        color: var(--text-primary);
+    }
+
+    .modal-body {
+        padding: 20px 24px;
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+
+    .material-option {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .material-option:hover {
+        border-color: var(--accent);
+        background: var(--accent-light);
+    }
+
+    .material-option-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    .material-option-info h4 {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .material-option-info p {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .material-option-price {
+        margin-left: auto;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    /* Smart Edge & Select Styles */
+    .module-defaults {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .default-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        flex: 1;
+    }
+
+    .default-group select {
+        flex: 1;
+        padding: 4px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+    }
+
+    .part-select-group {
+        display: flex;
+        gap: 6px;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .part-select {
+        width: 100%;
+        padding: 4px;
+        font-size: 0.85rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+    }
+
+    .smart-edge-group {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 4px;
+        justify-content: center;
+    }
+
+    .pill-btn {
+        padding: 2px 6px;
+        font-size: 0.7rem;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--bg-card);
+        cursor: pointer;
+        color: var(--text-primary);
+    }
+
+    .pill-btn:hover {
+        background: var(--bg-card-hover);
+    }
+
+    .pill-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    /* Part Remove Button */
+    .part-remove {
+        width: 28px;
+        height: 28px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        color: var(--text-muted);
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .part-remove:hover {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    /* Module Remove Button */
+    .module-remove {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-muted);
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+
+    .module-remove:hover {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Material Selection Modal -->
+<div class="modal-overlay" id="materialModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-layer-group" style="color: var(--accent);"></i> Malzeme Seçin</h3>
+            <button class="modal-close" onclick="closeMaterialModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" id="materialOptions">
+            <!-- Options will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<div class="nesting-page">
+    <!-- Mode Tabs -->
+    <div class="mode-tabs">
+        <button class="mode-tab active" onclick="switchMode('panelsaw')">
+            <i class="fas fa-grip-horizontal"></i> Panel Saw
+        </button>
+        <button class="mode-tab" onclick="switchMode('cnc')">
+            <i class="fas fa-vector-square"></i> CNC / Lazer Nesting
+        </button>
+    </div>
+
+    <!-- PANELSAW MODE -->
+    <div id="mode-panelsaw" class="mode-content active">
+        <div class="panelsaw-layout">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="project-info">
+                    <div class="project-field">
+                        <label>Proje Adı</label>
+                        <input type="text" id="projectName" placeholder="Örn: Mutfak Dolabı">
+                    </div>
+                    <div class="project-field">
+                        <label>Müşteri</label>
+                        <select id="customerSelect">
+                            <option value="">Müşteri Seçin...</option>
+                            {% for customer in customers %}
+                            <option value="{{ customer.id }}">{{ customer.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Settings Accordion -->
+                <div class="settings-toggle" id="settingsToggle">
+                    <button class="settings-toggle-btn" onclick="toggleSettings()">
+                        <span><i class="fas fa-cog"></i> Kesim Ayarları</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="settings-content">
+                        <div class="settings-inner">
+                            <div class="setting-group">
+                                <div class="setting-group-title"><i class="fas fa-th-large"></i> Plaka Boyutları</div>
+                                <div class="setting-row">
+                                    <div class="setting-item">
+                                        <label>En (mm)</label>
+                                        <input type="number" id="sheetWidth" value="2100" step="10">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>Boy (mm)</label>
+                                        <input type="number" id="sheetHeight" value="2800" step="10">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-group">
+                                <div class="setting-group-title"><i class="fas fa-cut"></i> Testere</div>
+                                <div class="setting-row">
+                                    <div class="setting-item">
+                                        <label>Kerf (mm)</label>
+                                        <input type="number" id="kerfWidth" value="4" step="0.5">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-group">
+                                <div class="setting-group-title"><i class="fas fa-border-style"></i> Kenar Temizleme
+                                </div>
+                                <div class="setting-row">
+                                    <div class="setting-item">
+                                        <label>Tüm Kenarlar</label>
+                                        <input type="number" id="edgeTrim" value="10">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-group">
+                                <div class="setting-group-title"><i class="fas fa-tape"></i> Kenar Bandı</div>
+                                <div class="setting-row">
+                                    <div class="setting-item">
+                                        <label>Kalınlık (mm)</label>
+                                        <input type="number" id="bandThickness" value="0.8" step="0.1">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label>Renk/Tip</label>
+                                        <select id="bandColor">
+                                            <option value="white">Beyaz</option>
+                                            <option value="black">Siyah</option>
+                                            <option value="oak">Meşe</option>
+                                            <option value="walnut">Ceviz</option>
+                                            <option value="anthracite">Antrasit</option>
+                                            <option value="custom">Özel</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modules & Parts -->
+            <div class="materials-section">
+                <div class="materials-header">
+                    <h2><i class="fas fa-cubes"></i> Modüller & Parçalar</h2>
+                    <div class="materials-actions">
+                        <button class="btn btn-secondary" onclick="addModule()">
+                            <i class="fas fa-plus"></i> Modül Ekle
+                        </button>
+                    </div>
+                </div>
+
+                <div class="materials-body" id="materialsContainer">
+                    <!-- Materials will be added dynamically -->
+                    <div class="empty-state" id="emptyState">
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            <i class="fas fa-cubes" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
+                            <p style="margin-bottom: 16px;">Henüz modül eklenmedi.</p>
+                            <button class="btn btn-primary" onclick="addModule()">
+                                <i class="fas fa-plus"></i> İlk Modülü Ekle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="action-bar">
+                    <div class="stats-preview">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalParts">12</div>
+                            <div class="stat-label">Toplam Parça</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalArea">3.2</div>
+                            <div class="stat-label">Toplam Alan (m²)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalEdge">8.4</div>
+                            <div class="stat-label">Bant (m)</div>
+                        </div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn btn-secondary" onclick="saveProject()">
+                            <i class="fas fa-save"></i> Kaydet
+                        </button>
+                        <button class="btn btn-primary" onclick="runOptimization()">
+                            <i class="fas fa-magic"></i> Optimize Et & Hesapla
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <h2 style="font-size: 16px; font-weight: 600;"><i class="fas fa-th"
+                            style="color: var(--accent);"></i> Kesim Planı Sonuçları</h2>
+                    <div class="results-stats">
+                        <div class="result-stat">
+                            <div class="value" id="sheetsUsed">0</div>
+                            <div class="label">Plaka</div>
+                        </div>
+                        <div class="result-stat">
+                            <div class="value success" id="efficiency">0%</div>
+                            <div class="label">Verimlilik</div>
+                        </div>
+                        <div class="result-stat">
+                            <div class="value" id="wasteArea">0</div>
+                            <div class="label">Fire (m²)</div>
+                        </div>
+                        <div class="result-stat">
+                            <div class="value" id="totalCost">0₺</div>
+                            <div class="label">Tahmini Maliyet</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CNC MODE -->
+    <div id="mode-cnc" class="mode-content">
+        <div class="cnc-section">
+            <div class="cnc-header">
+                <h2><i class="fas fa-vector-square" style="color: var(--accent);"></i> CNC / Lazer Nesting (SVGnest)
+                </h2>
+                <p>Düzensiz şekiller için True Shape nesting. SVG dosyanızı yükleyin ve optimize edin.</p>
+            </div>
+            <iframe src="https://svgnest.com" class="cnc-frame" id="svgnestFrame"></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/nesting.js') }}?v=2.0.1"></script>
+<script>
+    const materials = {{ materials | tojson | safe if materials else '[]' }};
+    const edgeBands = {{ edge_bands | tojson | safe if edge_bands else '[]' }};
+
+    // Part type definitions for intelligent categorization
+    const CONST_PART_TYPES = {
+        'cabinet': { label: 'Gövde', parts: ['Yan Dikme', 'Alt Tabla', 'Üst Tabla', 'AltÜst Tabla', 'Raf', 'Ara Dikme', 'Kayıt', 'Baza', 'Köşe Kapama', 'Yan Kapama', 'KörKapama'] },
+        'door': { label: 'Kapak', parts: ['Kapak', 'Çekmece Klavapaası', 'Sabit Klavapa'] },
+        'drawer': { label: 'Çekmece', parts: ['Çekmece Yanı', 'Çekmece Arkası', 'Çekmece Dibi'] },
+        'back': { label: 'Arkalık', parts: ['Arkalık', 'Arkalık Parçası'] },
+        'custom': { label: 'Özel', parts: ['Özel Parça'] }
+    };
+
+    function switchMode(mode) {
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
+
+        event.target.closest('.mode-tab').classList.add('active');
+        document.getElementById('mode-' + mode).classList.add('active');
+    }
+
+    function toggleSettings() {
+        document.getElementById('settingsToggle').classList.toggle('open');
+    }
+
+    // Materials dropdown HTML
+    function getMaterialOptionsHTML(selectedId = '') {
+        return materials.map(m =>
+            `<option value="${m.id}" ${m.id === selectedId ? 'selected' : ''}>${m.name}</option>`
+        ).join('');
+    }
+
+    function renderPartRowHTML(part = null) {
+        const p = part || { name: 'Parça', width: '', length: '', quantity: 1, edges: [], pattern: false, material_id: materials[0]?.id || '' };
+
+        const edges = p.edges || [];
+        const t = edges.includes('t') ? 'active' : '';
+        const b = edges.includes('b') ? 'active' : '';
+        const l = edges.includes('l') ? 'active' : '';
+        const r = edges.includes('r') ? 'active' : '';
+        const pat = p.pattern ? 'active' : '';
+
+        return `
+            <td><input type="text" class="part-name" value="${p.name}"></td>
+            <td><input type="number" class="part-w num" placeholder="0" value="${p.width}"></td>
+            <td><input type="number" class="part-l num" placeholder="0" value="${p.length}"></td>
+            <td><input type="number" class="part-qty num" value="${p.quantity}"></td>
+            <td>
+                <select class="part-material" onchange="autoSave()">
+                    ${getMaterialOptionsHTML(p.material_id)}
+                </select>
+            </td>
+            <td>
+                <div class="edge-selector">
+                    <div class="edge-menu-trigger">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="edge-presets-dropdown">
+                        <div class="edge-preset-item" onclick="setEdgePreset(this, '4')">
+                            <i class="far fa-square"></i> 4 Kenar
+                        </div>
+                        <div class="edge-preset-item" onclick="setEdgePreset(this, '2h')">
+                            <i class="fas fa-arrows-alt-v"></i> Alt-Üst
+                        </div>
+                        <div class="edge-preset-item" onclick="setEdgePreset(this, '2v')">
+                            <i class="fas fa-arrows-alt-h"></i> Sol-Sağ
+                        </div>
+                        <div class="edge-preset-item" onclick="setEdgePreset(this, 'u')">
+                            <i class="fas fa-arrow-up"></i> U Şekli
+                        </div>
+                        <div class="edge-preset-item" onclick="setEdgePreset(this, 'l')">
+                            <i class="fas fa-level-up-alt"></i> L Şekli (Üst+Sol)
+                        </div>
+                        <div class="edge-preset-item" onclick="setEdgePreset(this, '0')">
+                            <i class="fas fa-ban"></i> Temizle
+                        </div>
+                    </div>
+
+                    <div class="edge-btns">
+                        <button class="edge-btn ${t}" data-edge="t" onclick="toggleEdge(this)" title="Üst">↑</button>
+                        <button class="edge-btn ${b}" data-edge="b" onclick="toggleEdge(this)" title="Alt">↓</button>
+                        <button class="edge-btn ${l}" data-edge="l" onclick="toggleEdge(this)" title="Sol">←</button>
+                        <button class="edge-btn ${r}" data-edge="r" onclick="toggleEdge(this)" title="Sağ">→</button>
+                    </div>
+                </div>
+            </td>
+            <td class="pattern-cell"><div class="pattern-toggle ${pat}" onclick="this.classList.toggle('active')" title="Desen Yönü"></div></td>
+            <td><button class="delete-btn" onclick="this.closest('tr').remove(); updateStats(); autoSave();"><i class="fas fa-times"></i></button></td>
+        `;
+    }
+
+
+    // Module Functions
+    function addModule(savedModule = null) {
+        if (materials.length === 0) {
+            alert('Önce malzeme listesini kontrol ediniz.');
+            return;
+        }
+
+        const container = document.getElementById('materialsContainer');
+        const emptyState = document.getElementById('emptyState');
+        if (emptyState) emptyState.style.display = 'none';
+
+        const moduleId = savedModule?.id || 'mod_' + Date.now();
+        const moduleName = savedModule?.name || `Modül ${document.querySelectorAll('.module-card').length + 1}`;
+        const moduleType = savedModule?.type || 'Alt Dolap';
+
+        // Defaults
+        const defaultBodyMat = savedModule?.defaultBodyMat || materials[0]?.id || '';
+        const defaultDoorMat = savedModule?.defaultDoorMat || materials[0]?.id || '';
+
+        const card = document.createElement('div');
+        card.className = 'module-card';
+        card.dataset.moduleId = moduleId;
+        card.dataset.defaultBodyMat = defaultBodyMat;
+        card.dataset.defaultDoorMat = defaultDoorMat;
+
+        card.innerHTML = `
+            <div class="module-header">
+                <div class="module-title-group">
+                    <div class="module-icon"><i class="fas fa-cube"></i></div>
+                    <input type="text" class="module-name-input" value="${moduleName}" onchange="autoSave()">
+                    <select class="module-type-badge" onchange="autoSave()">
+                        <option value="Alt Dolap" ${moduleType === 'Alt Dolap' ? 'selected' : ''}>Alt Dolap</option>
+                        <option value="Üst Dolap" ${moduleType === 'Üst Dolap' ? 'selected' : ''}>Üst Dolap</option>
+                        <option value="Boy Dolap" ${moduleType === 'Boy Dolap' ? 'selected' : ''}>Boy Dolap</option>
+                        <option value="Köşe Dolap" ${moduleType === 'Köşe Dolap' ? 'selected' : ''}>Köşe Dolap</option>
+                        <option value="Çekmece Ünite" ${moduleType === 'Çekmece Ünite' ? 'selected' : ''}>Çekmece Ünite</option>
+                        <option value="Panel" ${moduleType === 'Panel' ? 'selected' : ''}>Panel</option>
+                        <option value="Özel" ${moduleType === 'Özel' ? 'selected' : ''}>Özel</option>
+                    </select>
+                </div>
+                <div class="module-materials">
+                    <div class="material-selector">
+                        <label>Gövde:</label>
+                        <select class="default-body-mat" onchange="updateModuleDefaults(this, 'body')">
+                            ${getMaterialOptionsHTML(defaultBodyMat)}
+                        </select>
+                    </div>
+                    <div class="material-selector">
+                        <label>Kapak:</label>
+                        <select class="default-door-mat" onchange="updateModuleDefaults(this, 'door')">
+                            ${getMaterialOptionsHTML(defaultDoorMat)}
+                        </select>
+                    </div>
+                    <div class="material-selector">
+                        <label>Arkalık:</label>
+                        <select class="default-back-thickness" onchange="updateModuleDefaults(this, 'back')">
+                            <option value="3">3mm</option>
+                            <option value="5">5mm</option>
+                            <option value="6">6mm</option>
+                            <option value="8" selected>8mm</option>
+                            <option value="10">10mm</option>
+                            <option value="12">12mm</option>
+                            <option value="18">18mm</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="module-actions">
+                    <button class="module-remove" onclick="removeModule(this)" title="Modülü Sil">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="parts-table-wrapper">
+                <table class="parts-table">
+                    <thead>
+                        <tr>
+                            <th style="width:8%">Modül</th>
+                            <th style="width:10%">Parça Tipi</th>
+                            <th style="width:12%">Parça Adı</th>
+                            <th style="width:10%">Boy (mm)</th>
+                            <th style="width:10%">En (mm)</th>
+                            <th style="width:6%">Adet</th>
+                            <th style="width:16%">Malzeme</th>
+                            <th style="width:18%">Akıllı Bant</th>
+                            <th style="width:5%">Desen</th>
+                            <th style="width:5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button class="add-part-row" onclick="addPartRow(this)"><i class="fas fa-plus"></i> Parça Ekle</button>
+            </div>
+        `;
+
+        container.appendChild(card);
+
+        // Load saved parts or add empty row
+        const tbody = card.querySelector('tbody');
+        const moduleNameVal = savedModule?.name || moduleName;
+        if (savedModule && savedModule.parts && savedModule.parts.length > 0) {
+            savedModule.parts.forEach(part => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = renderPartRowHTML(part, moduleNameVal);
+                tbody.appendChild(tr);
+            });
+        } else {
+            addPartRow(card.querySelector('.add-part-row'));
+        }
+
+        updateStats();
+        autoSave();
+    }
+
+    function updateModuleDefaults(select, type) {
+        const card = select.closest('.module-card');
+        if (type === 'body') card.dataset.defaultBodyMat = select.value;
+        if (type === 'door') card.dataset.defaultDoorMat = select.value;
+        autoSave();
+    }
+
+    function removeModule(btn) {
+        btn.closest('.module-card').remove();
+        updateStats();
+
+        // Show empty state if no modules left
+        const cards = document.querySelectorAll('.module-card');
+        if (cards.length === 0) {
+            const emptyState = document.getElementById('emptyState');
+            if (emptyState) emptyState.style.display = 'block';
+        }
+        autoSave();
+    }
+
+
+    function getPartTypeOptions(group, selected = '') {
+        const parts = CONST_PART_TYPES[group]?.parts || [];
+        return parts.map(p =>
+            `<option value="${p}" ${p === selected ? 'selected' : ''}>${p}</option>`
+        ).join('');
+    }
+
+    function updatePartTypeOptions(select) {
+        const row = select.closest('tr');
+        const group = select.value;
+        const typeSelect = row.querySelector('.p-type');
+        typeSelect.innerHTML = getPartTypeOptions(group);
+
+        // Trigger auto fill for the first item
+        autoFillPartAttributes(typeSelect);
+        updatePartMaterial(row);
+    }
+
+    function autoFillPartAttributes(select) {
+        const row = select.closest('tr');
+        const type = select.value;
+        const group = row.querySelector('.p-group').value;
+        const qtyInput = row.querySelector('.part-qty');
+
+        // Auto Qty Logic
+        if (['Yan Dikme', 'Kayıt', 'Çekmece Yanı'].includes(type)) {
+            qtyInput.value = 2;
+        } else {
+            qtyInput.value = 1;
+        }
+
+        updatePartMaterial(row);
+        autoSave();
+    }
+
+    function updatePartMaterial(row) {
+        const moduleCard = row.closest('.module-card');
+        const group = row.querySelector('.p-group').value;
+        const matSelect = row.querySelector('.part-material');
+
+        // Decide default material based on group
+        if (group === 'door') {
+            matSelect.value = moduleCard.dataset.defaultDoorMat || '';
+        } else {
+            // Default to body for cabinet, drawer, etc.
+            matSelect.value = moduleCard.dataset.defaultBodyMat || '';
+        }
+    }
+
+    function renderPartRowHTML(part = {}, moduleName = '') {
+        const group = part.group || 'cabinet';
+        const type = part.type || CONST_PART_TYPES['cabinet'].parts[0];
+        const matId = part.material_id || '';
+        const edges = part.edges || { t: '0', b: '0', l: '0', r: '0' };
+
+        return `
+            <td style="padding: 4px;">
+                <span class="module-name-display" style="font-weight: 600; color: var(--text-primary); font-size: 12px;">${moduleName}</span>
+            </td>
+            <td style="padding: 4px;">
+                <select class="part-select p-group" onchange="updatePartTypeOptions(this)">
+                    ${Object.entries(CONST_PART_TYPES).map(([k, v]) =>
+            `<option value="${k}" ${k === group ? 'selected' : ''}>${v.label}</option>`
+        ).join('')}
+                </select>
+            </td>
+            <td style="padding: 4px;">
+                <div class="part-name-wrapper" ondblclick="enableCustomPartName(this)">
+                    <select class="part-select p-type" onchange="autoFillPartAttributes(this)">
+                        ${getPartTypeOptions(group, type)}
+                    </select>
+                    <input type="text" class="custom-part-name" value="${part.customName || ''}" 
+                        style="display: ${part.customName ? 'block' : 'none'}; width: 100%; padding: 6px 8px; border: 1px solid var(--accent); border-radius: 6px; font-size: 12px;" 
+                        onblur="handleCustomNameBlur(this)" onchange="autoSave()">
+                </div>
+            </td>
+            <td><input type="number" class="part-l" value="${part.length || 0}" onchange="recalcSmartEdge(this)"></td>
+            <td><input type="number" class="part-w" value="${part.width || 0}" onchange="recalcSmartEdge(this)"></td>
+            <td><input type="number" class="part-qty" value="${part.quantity || 1}" onchange="autoSave()"></td>
+            <td>
+                <select class="part-material" onchange="autoSave()">
+                    ${getMaterialOptionsHTML(matId)}
+                </select>
+            </td>
+            <td>
+                <div class="smart-edge-group">
+                    <button class="pill-btn ${part.smartRule === '1B' ? 'active' : ''}" onclick="setSmartEdge(this, '1B')">1B</button>
+                    <button class="pill-btn ${part.smartRule === '2B' ? 'active' : ''}" onclick="setSmartEdge(this, '2B')">2B</button>
+                    <button class="pill-btn ${part.smartRule === '1E' ? 'active' : ''}" onclick="setSmartEdge(this, '1E')">1E</button>
+                    <button class="pill-btn ${part.smartRule === '2E' ? 'active' : ''}" onclick="setSmartEdge(this, '2E')">2E</button>
+                    <button class="pill-btn ${part.smartRule === '4EB' ? 'active' : ''}" onclick="setSmartEdge(this, '4EB')">4EB</button>
+                </div>
+                <!-- Hidden Edge Data -->
+                <input type="hidden" class="edge-val-t" value="${edges.t}">
+                <input type="hidden" class="edge-val-b" value="${edges.b}">
+                <input type="hidden" class="edge-val-l" value="${edges.l}">
+                <input type="hidden" class="edge-val-r" value="${edges.r}">
+                <input type="hidden" class="smart-rule" value="${part.smartRule || ''}">
+            </td>
+            <td>
+                <div class="pattern-toggle ${part.pattern ? 'active' : ''}" onclick="togglePattern(this)">
+                    <div class="pattern-knob"></div>
+                </div>
+            </td>
+            <td><button class="part-remove" onclick="removePartRow(this)">×</button></td>
+        `;
+    }
+
+    function addPartRow(btn) {
+        const tbody = btn.closest('.parts-table-wrapper').querySelector('table tbody');
+        const moduleCard = btn.closest('.module-card');
+        const moduleName = moduleCard?.querySelector('.module-name-input')?.value || 'Modül';
+        const tr = document.createElement('tr');
+        tr.innerHTML = renderPartRowHTML({}, moduleName);
+        tbody.appendChild(tr);
+
+        // Initial auto-fill for new row
+        const typeSelect = tr.querySelector('.p-type');
+        autoFillPartAttributes(typeSelect);
+    }
+
+    function removePartRow(btn) {
+        btn.closest('tr').remove();
+        updateStats();
+        autoSave();
+    }
+
+    function removeModule(btn) {
+        const card = btn.closest('.module-card');
+        if (!card) return;
+
+        // Onay iste
+        if (!confirm('Bu modülü silmek istediğinizden emin misiniz?')) return;
+
+        card.remove();
+
+        // Eğer hiç modül kalmadıysa empty state göster
+        const remainingModules = document.querySelectorAll('.module-card').length;
+        if (remainingModules === 0) {
+            const emptyState = document.getElementById('emptyState');
+            if (emptyState) emptyState.style.display = 'flex';
+        }
+
+        updateStats();
+        autoSave();
+    }
+
+    // Enable custom part type input on double-click
+    function enableCustomPartName(wrapper) {
+        const select = wrapper.querySelector('.p-type');
+        const input = wrapper.querySelector('.custom-part-name');
+
+        if (select && input) {
+            select.style.display = 'none';
+            input.style.display = 'block';
+            input.focus();
+            input.select();
+        }
+    }
+
+    // Handle blur on custom name input
+    function handleCustomNameBlur(input) {
+        const wrapper = input.closest('.part-name-wrapper');
+        const select = wrapper.querySelector('.p-type');
+
+        if (!input.value.trim()) {
+            // If empty, show dropdown again
+            input.style.display = 'none';
+            if (select) select.style.display = 'block';
+        } else {
+            autoSave();
+        }
+    }
+
+    // --- Smart Edge Logic ---
+    function setSmartEdge(btn, rule) {
+        const row = btn.closest('tr');
+        const w = parseFloat(row.querySelector('.part-w').value) || 0;
+        const l = parseFloat(row.querySelector('.part-l').value) || 0;
+        const allBtns = row.querySelectorAll('.pill-btn');
+        const btn4EB = Array.from(allBtns).find(b => b.textContent === '4EB');
+
+        // 4EB özel durum: Tümünü seç, diğerlerini kapat
+        if (rule === '4EB') {
+            allBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            row.querySelector('.smart-rule').value = '4EB';
+            // Tüm kenarları aç
+            row.querySelector('.edge-val-t').value = '0.8';
+            row.querySelector('.edge-val-b').value = '0.8';
+            row.querySelector('.edge-val-l').value = '0.8';
+            row.querySelector('.edge-val-r').value = '0.8';
+            updateStats();
+            autoSave();
+            return;
+        }
+
+        // Diğer butonlar: Toggle davranışı
+        btn.classList.toggle('active');
+
+        // 4EB aktifse kapat (çünkü artık kısmi seçim)
+        if (btn4EB) btn4EB.classList.remove('active');
+
+        // Aktif butonları topla
+        const activeRules = [];
+        allBtns.forEach(b => {
+            if (b.classList.contains('active') && b.textContent !== '4EB') {
+                activeRules.push(b.textContent);
+            }
+        });
+
+        // Kenar hesaplama
+        const edges = { t: '0', b: '0', l: '0', r: '0' };
+
+        if (w > 0 && l > 0) {
+            activeRules.forEach(r => {
+                if (r === '1B') {
+                    if (l >= w) edges.l = '0.8';
+                    else edges.t = '0.8';
+                }
+                if (r === '2B') {
+                    if (l >= w) { edges.l = '0.8'; edges.r = '0.8'; }
+                    else { edges.t = '0.8'; edges.b = '0.8'; }
+                }
+                if (r === '1E') {
+                    if (l >= w) edges.t = '0.8';
+                    else edges.l = '0.8';
+                }
+                if (r === '2E') {
+                    if (l >= w) { edges.t = '0.8'; edges.b = '0.8'; }
+                    else { edges.l = '0.8'; edges.r = '0.8'; }
+                }
+            });
+        }
+
+        // Eğer 4 kenar da aktifse VEYA 2B+2E seçiliyse -> 4EB'ye dönüştür
+        const has2B = activeRules.includes('2B');
+        const has2E = activeRules.includes('2E');
+        const allEdgesActive = edges.t === '0.8' && edges.b === '0.8' && edges.l === '0.8' && edges.r === '0.8';
+
+        if (allEdgesActive || (has2B && has2E)) {
+            allBtns.forEach(b => b.classList.remove('active'));
+            if (btn4EB) btn4EB.classList.add('active');
+            row.querySelector('.smart-rule').value = '4EB';
+            // Tüm kenarları aç
+            edges.t = '0.8'; edges.b = '0.8'; edges.l = '0.8'; edges.r = '0.8';
+        } else {
+            row.querySelector('.smart-rule').value = activeRules.join('+');
+        }
+
+        // Kenar değerlerini uygula
+        row.querySelector('.edge-val-t').value = edges.t;
+        row.querySelector('.edge-val-b').value = edges.b;
+        row.querySelector('.edge-val-l').value = edges.l;
+        row.querySelector('.edge-val-r').value = edges.r;
+
+        updateStats();
+        autoSave();
+    }
+
+    function recalcSmartEdge(input) {
+        const row = input.closest('tr');
+        const rule = row.querySelector('.smart-rule').value;
+        if (rule) {
+            const activeBtn = Array.from(row.querySelectorAll('.pill-btn')).find(b => b.textContent === rule);
+            if (activeBtn) setSmartEdge(activeBtn, rule);
+        }
+        updateStats();
+        autoSave();
+    }
+
+    function togglePattern(el) {
+        el.classList.toggle('active');
+        updateStats();
+        autoSave();
+    }
+
+    // --- Data Collection & Stats ---
+
+    function collectProjectData() {
+        const data = {
+            modules: [],
+            projectName: document.getElementById('projectName').value || '',
+            customerId: document.getElementById('customerSelect').value || ''
+        };
+
+        document.querySelectorAll('.module-card').forEach(card => {
+            const module = {
+                id: card.dataset.moduleId,
+                name: card.querySelector('.module-name-input').value,
+                type: card.querySelector('.module-type-badge').value,
+                defaultBodyMat: card.dataset.defaultBodyMat,
+                defaultDoorMat: card.dataset.defaultDoorMat,
+                parts: []
+            };
+
+            card.querySelectorAll('tbody tr').forEach(row => {
+                const grp = row.querySelector('.p-group').value;
+                const typ = row.querySelector('.p-type').value;
+
+                module.parts.push({
+                    group: grp,
+                    type: typ,
+                    name: `${CONST_PART_TYPES[grp].label} - ${typ}`,
+                    width: parseFloat(row.querySelector('.part-w')?.value) || 0,
+                    length: parseFloat(row.querySelector('.part-l')?.value) || 0,
+                    quantity: parseInt(row.querySelector('.part-qty')?.value) || 1,
+                    material_id: row.querySelector('.part-material')?.value || '',
+                    edges: {
+                        t: row.querySelector('.edge-val-t').value,
+                        b: row.querySelector('.edge-val-b').value,
+                        l: row.querySelector('.edge-val-l').value,
+                        r: row.querySelector('.edge-val-r').value
+                    },
+                    smartRule: row.querySelector('.smart-rule').value,
+                    pattern: row.querySelector('.pattern-toggle')?.classList.contains('active') || false
+                });
+            });
+
+            data.modules.push(module);
+        });
+
+        return data;
+    }
+
+    function updateStats() {
+        let totalParts = 0, totalArea = 0, totalEdge = 0;
+        document.querySelectorAll('.module-card tbody tr').forEach(row => {
+            const w = parseFloat(row.querySelector('.part-w')?.value) || 0;
+            const l = parseFloat(row.querySelector('.part-l')?.value) || 0;
+            const qty = parseInt(row.querySelector('.part-qty')?.value) || 0;
+
+            if (w > 0 && l > 0) {
+                totalParts += qty;
+                totalArea += (w * l * qty) / 1000000;
+
+                const t = row.querySelector('.edge-val-t').value !== '0';
+                const b = row.querySelector('.edge-val-b').value !== '0';
+                const lr = row.querySelector('.edge-val-l').value !== '0';
+                const r = row.querySelector('.edge-val-r').value !== '0';
+
+                if (t) totalEdge += (w * qty);
+                if (b) totalEdge += (w * qty);
+                if (lr) totalEdge += (l * qty);
+                if (r) totalEdge += (l * qty);
+            }
+        });
+        document.getElementById('totalParts').textContent = totalParts;
+        document.getElementById('totalArea').textContent = totalArea.toFixed(2);
+        document.getElementById('totalEdge').textContent = (totalEdge / 1000).toFixed(1);
+    }
+
+    function autoSave() {
+        const data = collectProjectData();
+        localStorage.setItem('nesting_draft', JSON.stringify(data));
+    }
+
+    async function saveProject() {
+        const data = collectProjectData();
+        const projectName = document.getElementById('projectName')?.value || 'Adsız Proje';
+        const customerId = document.getElementById('customerSelect')?.value || '';
+
+        // Also save draft to localStorage for recovery
+        localStorage.setItem('nesting_draft', JSON.stringify(data));
+
+        // Prepare project data for API
+        const projectData = {
+            name: projectName,
+            customer_id: customerId,
+            modules: data.modules || [],
+            status: 'draft'
+        };
+
+        try {
+            const response = await fetch('/api/nesting/project', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(projectData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Store the project ID for future updates
+                window.currentProjectId = result.id;
+                showToast('Kaydedildi', `"${projectName}" başarıyla kaydedildi.`, 'success');
+            } else {
+                showToast('Hata', 'Proje kaydedilemedi: ' + (result.error || 'Bilinmeyen hata'), 'error');
+            }
+        } catch (error) {
+            console.error('Save error:', error);
+            showToast('Hata', 'Sunucuya bağlanılamadı. Proje yerel olarak kaydedildi.', 'warning');
+        }
+    }
+
+    function loadFromStorage() {
+        const saved = localStorage.getItem('nesting_draft');
+        if (!saved) return;
+
+        try {
+            const data = JSON.parse(saved);
+            if (data.projectName) document.getElementById('projectName').value = data.projectName;
+            if (data.customerId) document.getElementById('customerSelect').value = data.customerId;
+
+            const container = document.getElementById('materialsContainer');
+            container.innerHTML = '';
+
+            if (data.modules && data.modules.length > 0) {
+                data.modules.forEach(mod => addModule(mod));
+            } else {
+                document.getElementById('totalParts').textContent = '0';
+            }
+        } catch (e) {
+            console.error('Load error:', e);
+        }
+    }
+
+
+    // ========== OPTIMIZATION ENGINE ==========
+    // runOptimization(), GuillotinePacker, ve drawResultsSVG() fonksiyonları
+    // artık external nesting.js dosyasında. SVG görselleştirme, renk kodlama,
+    // parça etiketleri ve fire görselleştirmesi için nesting.js kullanılıyor.
+
+    // Initial load
+    loadFromStorage();
+    updateStats();
+
+    // Event delegation for dynamic updates
+    document.getElementById('materialsContainer').addEventListener('input', function (e) {
+        if (e.target.matches('.part-w, .part-l, .part-qty, .part-name')) {
+            updateStats();
+            autoSave();
+        }
+    });
+
+    document.getElementById('materialsContainer').addEventListener('click', function (e) {
+        if (e.target.matches('.edge-btn')) {
+            setTimeout(() => { updateStats(); autoSave(); }, 10);
+        }
+    });
+
+    // Enter key to add new part row
+    document.getElementById('materialsContainer').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && e.target.matches('input, select')) {
+            if (e.target.matches('.part-material')) { // Last input
+                // Add new row logic
+                e.preventDefault();
+                const moduleCard = e.target.closest('.module-card');
+                const addBtn = moduleCard.querySelector('.add-part-row');
+                addPartRow(addBtn);
+                // Focus logic...
+            }
+        }
+    });
+
+    // Auto-save project name and customer
+    document.getElementById('projectName').addEventListener('input', autoSave);
+    document.getElementById('customerSelect').addEventListener('change', autoSave);
+</script>
+{% endblock %}

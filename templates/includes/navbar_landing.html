@@ -1,0 +1,38 @@
+<nav class="navbar">
+    <a href="/" class="nav-brand">
+        <div class="nav-logo"><i class="fas fa-bolt"></i></div><span class="nav-title">MAZZEL WORKS</span>
+    </a>
+
+    <!-- Optional: Add Landing Page specific links here or keep empty if it's meant to be clean -->
+    <div class="nav-links">
+        <a href="/hizmetler" class="nav-link">Hizmetler</a>
+        <a href="/referanslar" class="nav-link">Referanslar</a>
+        <a href="/iletisim" class="nav-link">İletişim</a>
+    </div>
+
+    <div class="nav-right">
+        <div class="nav-time" id="navTime"></div>
+        <div class="theme-group">
+            <button class="theme-btn light active" onclick="setMode('light')"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn dark" onclick="setMode('dark')"><i class="fas fa-moon"></i></button>
+            <button class="color-btn purple active" onclick="setColor('purple')"></button>
+            <button class="color-btn ocean" onclick="setColor('ocean')"></button>
+            <button class="color-btn rose" onclick="setColor('rose')"></button>
+        </div>
+        <button class="login-trigger" onclick="openModal()">
+            <i class="fas fa-user-circle"></i> Giriş Yap
+        </button>
+    </div>
+</nav>
+
+<script>
+    // Time Update for Navbar
+    function updateNavTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        const timeEl = document.getElementById('navTime');
+        if (timeEl) timeEl.textContent = timeString;
+    }
+    setInterval(updateNavTime, 1000);
+    updateNavTime();
+</script>

@@ -1,0 +1,646 @@
+{% extends "base.html" %}
+
+{% block title %}Müşteriler | Mazzel OS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-title h1 {
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .page-title .count {
+        background: var(--accent);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .search-input {
+        padding: 12px 16px;
+        padding-left: 44px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 14px;
+        width: 300px;
+    }
+
+    .search-input-wrap {
+        position: relative;
+    }
+
+    .search-input-wrap i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+
+    /* Customer Grid */
+    .customers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 20px;
+    }
+
+    .customer-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.2s;
+    }
+
+    .customer-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+    }
+
+    .customer-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .customer-avatar {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .customer-main {
+        flex: 1;
+    }
+
+    .customer-name {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .customer-contact {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .customer-status {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .customer-status.active {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+
+    .customer-status.passive {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    .customer-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .detail-item i {
+        width: 16px;
+        color: var(--text-muted);
+    }
+
+    .customer-tags {
+        display: flex;
+        gap: 6px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        padding: 4px 10px;
+        background: var(--bg-input);
+        border-radius: 20px;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .customer-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .customer-actions button {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .customer-actions button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .customer-actions button.danger:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-box {
+        background: var(--bg-card);
+        border-radius: 20px;
+        width: 600px;
+        max-width: 95vw;
+        max-height: 90vh;
+        overflow: hidden;
+        transform: scale(0.9);
+        transition: transform 0.3s;
+    }
+
+    .modal-overlay.show .modal-box {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .modal-body {
+        padding: 24px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 14px;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        opacity: 0.3;
+        margin-bottom: 20px;
+    }
+
+    .empty-state p {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Add/Edit Customer Modal -->
+<div class="modal-overlay" id="customerModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-plus" style="color: var(--accent);"></i> <span id="modalTitle">Yeni Müşteri</span>
+            </h3>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="customerId">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Müşteri Tipi</label>
+                    <select id="customerType">
+                        <option value="company">Firma</option>
+                        <option value="individual">Bireysel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Firma Adı</label>
+                    <input type="text" id="companyName" placeholder="ABC Mobilya">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Vergi No</label>
+                    <input type="text" id="taxNumber" placeholder="1234567890">
+                </div>
+                <div class="form-group">
+                    <label>Vergi Dairesi</label>
+                    <input type="text" id="taxOffice" placeholder="Kadıköy">
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: var(--text-muted);">İletişim Bilgileri</h4>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Yetkili Kişi</label>
+                    <input type="text" id="contactName" placeholder="Ahmet Yılmaz">
+                </div>
+                <div class="form-group">
+                    <label>Pozisyon</label>
+                    <input type="text" id="contactPosition" placeholder="Satın Alma Müdürü">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Telefon</label>
+                    <input type="text" id="contactPhone" placeholder="0532 xxx xx xx">
+                </div>
+                <div class="form-group">
+                    <label>E-posta</label>
+                    <input type="email" id="contactEmail" placeholder="ahmet@firma.com">
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: var(--text-muted);">Adres</h4>
+
+            <div class="form-group">
+                <label>Adres</label>
+                <input type="text" id="addressStreet" placeholder="Sanayi Cad. No:45">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>İlçe</label>
+                    <input type="text" id="addressDistrict" placeholder="Ümraniye">
+                </div>
+                <div class="form-group">
+                    <label>Şehir</label>
+                    <input type="text" id="addressCity" placeholder="İstanbul">
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: var(--text-muted);">Ödeme Bilgileri</h4>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ödeme Şekli</label>
+                    <select id="paymentMethod">
+                        <option value="transfer">Havale/EFT</option>
+                        <option value="cash">Nakit</option>
+                        <option value="check">Çek</option>
+                        <option value="credit">Kredi Kartı</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Vade (Gün)</label>
+                    <input type="number" id="paymentTerm" value="0" min="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notlar</label>
+                <textarea id="customerNotes" placeholder="Müşteri hakkında notlar..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+            <button class="btn btn-primary" onclick="saveCustomer()"><i class="fas fa-save"></i> Kaydet</button>
+        </div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="page-title">
+        <h1><i class="fas fa-users" style="color: var(--accent);"></i> Müşteriler</h1>
+        <span class="count" id="customerCount">{{ customers|length }}</span>
+    </div>
+    <div class="search-box">
+        <div class="search-input-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Müşteri ara..."
+                oninput="filterCustomers()">
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> Yeni Müşteri
+        </button>
+    </div>
+</div>
+
+<div class="customers-grid" id="customersGrid">
+    {% if customers %}
+    {% for c in customers %}
+    <div class="customer-card" data-id="{{ c.id }}" data-name="{{ c.company_name|lower }}">
+        <div class="customer-header">
+            <div class="customer-avatar">{{ c.company_name[:2]|upper }}</div>
+            <div class="customer-main">
+                <div class="customer-name">{{ c.company_name }}</div>
+                <div class="customer-contact">{{ c.contact.name if c.contact else '' }}</div>
+            </div>
+            <span class="customer-status {{ c.status }}">{{ 'Aktif' if c.status == 'active' else 'Pasif' }}</span>
+        </div>
+        <div class="customer-details">
+            <div class="detail-item"><i class="fas fa-phone"></i> {{ c.contact.phone if c.contact else '-' }}</div>
+            <div class="detail-item"><i class="fas fa-envelope"></i> {{ c.contact.email if c.contact else '-' }}</div>
+            <div class="detail-item"><i class="fas fa-map-marker-alt"></i> {{ c.address.city if c.address else '-' }}
+            </div>
+            <div class="detail-item"><i class="fas fa-clock"></i> {{ c.payment.term_days if c.payment else 0 }} gün vade
+            </div>
+        </div>
+        {% if c.tags %}
+        <div class="customer-tags">
+            {% for tag in c.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="customer-actions">
+            <button onclick="editCustomer('{{ c.id }}')"><i class="fas fa-edit"></i> Düzenle</button>
+            <button onclick="viewCustomer('{{ c.id }}')"><i class="fas fa-eye"></i> Detay</button>
+            <button class="danger" onclick="deleteCustomer('{{ c.id }}')"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state" style="grid-column: 1/-1;">
+        <i class="fas fa-users"></i>
+        <p>Henüz müşteri eklenmedi.</p>
+        <button class="btn btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> İlk Müşteriyi Ekle
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const customersData = {{ customers | tojson | safe }};
+
+    function openAddModal() {
+        document.getElementById('modalTitle').textContent = 'Yeni Müşteri';
+        document.getElementById('customerId').value = '';
+        clearForm();
+        document.getElementById('customerModal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('customerModal').classList.remove('show');
+    }
+
+    function clearForm() {
+        ['companyName', 'taxNumber', 'taxOffice', 'contactName', 'contactPosition',
+            'contactPhone', 'contactEmail', 'addressStreet', 'addressDistrict',
+            'addressCity', 'customerNotes'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        document.getElementById('customerType').value = 'company';
+        document.getElementById('paymentMethod').value = 'transfer';
+        document.getElementById('paymentTerm').value = '0';
+    }
+
+    function editCustomer(id) {
+        const c = customersData.find(x => x.id === id);
+        if (!c) return;
+
+        document.getElementById('modalTitle').textContent = 'Müşteri Düzenle';
+        document.getElementById('customerId').value = c.id;
+        document.getElementById('customerType').value = c.type || 'company';
+        document.getElementById('companyName').value = c.company_name || '';
+        document.getElementById('taxNumber').value = c.tax_number || '';
+        document.getElementById('taxOffice').value = c.tax_office || '';
+        document.getElementById('contactName').value = c.contact?.name || '';
+        document.getElementById('contactPosition').value = c.contact?.position || '';
+        document.getElementById('contactPhone').value = c.contact?.phone || '';
+        document.getElementById('contactEmail').value = c.contact?.email || '';
+        document.getElementById('addressStreet').value = c.address?.street || '';
+        document.getElementById('addressDistrict').value = c.address?.district || '';
+        document.getElementById('addressCity').value = c.address?.city || '';
+        document.getElementById('paymentMethod').value = c.payment?.method || 'transfer';
+        document.getElementById('paymentTerm').value = c.payment?.term_days || 0;
+        document.getElementById('customerNotes').value = c.notes || '';
+
+        document.getElementById('customerModal').classList.add('show');
+    }
+
+    function saveCustomer() {
+        const id = document.getElementById('customerId').value;
+        const data = {
+            type: document.getElementById('customerType').value,
+            company_name: document.getElementById('companyName').value,
+            tax_number: document.getElementById('taxNumber').value,
+            tax_office: document.getElementById('taxOffice').value,
+            contact: {
+                name: document.getElementById('contactName').value,
+                position: document.getElementById('contactPosition').value,
+                phone: document.getElementById('contactPhone').value,
+                email: document.getElementById('contactEmail').value
+            },
+            address: {
+                street: document.getElementById('addressStreet').value,
+                district: document.getElementById('addressDistrict').value,
+                city: document.getElementById('addressCity').value
+            },
+            payment: {
+                method: document.getElementById('paymentMethod').value,
+                term_days: parseInt(document.getElementById('paymentTerm').value) || 0
+            },
+            notes: document.getElementById('customerNotes').value,
+            sites: [],
+            tags: []
+        };
+
+        if (!data.company_name) {
+            Toast.warning('Firma adı gerekli!');
+            return;
+        }
+
+        const url = id ? `/api/customers/${id}` : '/api/customers';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    Toast.success('Müşteri kaydedildi!');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    Toast.error('Hata: ' + result.error);
+                }
+            })
+            .catch(e => Toast.error('Kaydetme hatası: ' + e));
+    }
+
+    function deleteCustomer(id) {
+        const c = customersData.find(x => x.id === id);
+        confirmDelete(c?.company_name || 'Bu müşteri').then(confirmed => {
+            if (!confirmed) return;
+
+            fetch(`/api/customers/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.success) {
+                        Toast.success('Müşteri silindi!');
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                });
+        });
+    }
+
+    function viewCustomer(id) {
+        // TODO: Detay sayfası veya modal
+        editCustomer(id);
+    }
+
+    function filterCustomers() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.customer-card');
+        let visible = 0;
+
+        cards.forEach(card => {
+            const name = card.dataset.name || '';
+            if (name.includes(search)) {
+                card.style.display = '';
+                visible++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('customerCount').textContent = visible;
+    }
+
+    // Close modal on overlay click
+    document.getElementById('customerModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+{% endblock %}

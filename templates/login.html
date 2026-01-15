@@ -1,1183 +1,189 @@
-<!DOCTYPE html>
-<html lang="tr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ settings.site_title }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* ========== LIGHT THEME ========== */
-        :root {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --bg-card-hover: #f1f5f9;
-            --bg-input: #f1f5f9;
-            --border-color: #e2e8f0;
-            --border-hover: #8b5cf6;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --accent: #8b5cf6;
-            --accent-secondary: #a855f7;
-            --accent-light: rgba(139, 92, 246, 0.1);
-            --accent-glow: rgba(139, 92, 246, 0.25);
-            --success: #22c55e;
-            --success-light: rgba(34, 197, 94, 0.1);
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --warning-light: rgba(245, 158, 11, 0.1);
-        }
-
-        /* ========== DARK THEME ========== */
-        [data-theme="dark"] {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #111118;
-            --bg-card: #16161f;
-            --bg-card-hover: #1e1e2a;
-            --bg-input: #1e1e2a;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.4);
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Ocean Light */
-        [data-theme="ocean"] {
-            --bg-primary: #ecfeff;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --bg-card-hover: #cffafe;
-            --bg-input: #cffafe;
-            --border-color: #a5f3fc;
-            --accent: #0891b2;
-            --accent-secondary: #06b6d4;
-            --accent-light: rgba(8, 145, 178, 0.15);
-            --accent-glow: rgba(8, 145, 178, 0.3);
-        }
-
-        /* Ocean Dark */
-        [data-theme="ocean-dark"] {
-            --bg-primary: #042f2e;
-            --bg-secondary: #0a3d3c;
-            --bg-card: #0d4f4e;
-            --bg-card-hover: #115e5d;
-            --bg-input: #115e5d;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-primary: #fff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.4);
-            --accent: #06b6d4;
-            --accent-secondary: #22d3ee;
-            --accent-light: rgba(6, 182, 212, 0.2);
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Rose Light */
-        [data-theme="rose"] {
-            --bg-primary: #fff1f2;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --bg-card-hover: #ffe4e6;
-            --bg-input: #ffe4e6;
-            --border-color: #fecdd3;
-            --accent: #e11d48;
-            --accent-secondary: #f43f5e;
-            --accent-light: rgba(225, 29, 72, 0.15);
-            --accent-glow: rgba(225, 29, 72, 0.3);
-        }
-
-        /* Rose Dark */
-        [data-theme="rose-dark"] {
-            --bg-primary: #1a0a0d;
-            --bg-secondary: #2a1015;
-            --bg-card: #3a151c;
-            --bg-card-hover: #4a1a23;
-            --bg-input: #4a1a23;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-primary: #fff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.4);
-            --accent: #f43f5e;
-            --accent-secondary: #fb7185;
-            --accent-light: rgba(244, 63, 94, 0.2);
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        /* Navbar */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 72px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 32px;
-            z-index: 1000;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-
-        .nav-logo {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-
-        .nav-logo i {
-            font-size: 20px;
-            color: white;
-        }
-
-        .nav-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .nav-center {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--bg-card);
-            padding: 6px;
-            border-radius: 14px;
-            border: 1px solid var(--border-color);
-        }
-
-        .nav-link {
-            padding: 10px 20px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 10px;
-            transition: all 0.2s;
-        }
-
-        .nav-link:hover {
-            color: var(--text-primary);
-            background: var(--bg-card-hover);
-        }
-
-        .nav-link.active {
-            color: white;
-            background: var(--accent);
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .theme-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: var(--bg-card);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .theme-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .theme-toggle {
-            display: flex;
-            gap: 4px;
-        }
-
-        .theme-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .theme-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .theme-btn.active {
-            border-color: var(--accent);
-        }
-
-        .theme-btn.light {
-            background: #f8fafc;
-            color: #0f172a;
-        }
-
-        .theme-btn.dark {
-            background: #1e1e2a;
-            color: #fff;
-        }
-
-        .color-btns {
-            display: flex;
-            gap: 4px;
-            margin-left: 8px;
-            padding-left: 8px;
-            border-left: 1px solid var(--border-color);
-        }
-
-        .color-btn {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .color-btn:hover {
-            transform: scale(1.15);
-        }
-
-        .color-btn.active {
-            border-color: var(--text-primary);
-        }
-
-        .color-btn.purple {
-            background: linear-gradient(135deg, #8b5cf6, #a855f7);
-        }
-
-        .color-btn.ocean {
-            background: linear-gradient(135deg, #0891b2, #06b6d4);
-        }
-
-        .color-btn.rose {
-            background: linear-gradient(135deg, #e11d48, #f43f5e);
-        }
-
-        .nav-time {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        .login-trigger {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-
-        .login-trigger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--accent-glow);
-        }
-
-        /* Main */
-        .main-content {
-            padding-top: 104px;
-            padding-bottom: 60px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 32px;
-        }
-
-        /* Hero */
-        .hero-section {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .hero-date {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--accent);
-            margin-bottom: 16px;
-            padding: 8px 16px;
-            background: var(--accent-light);
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .hero-title {
-            font-size: 48px;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin-bottom: 16px;
-        }
-
-        .hero-title span {
-            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Widgets */
-        .widgets-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .widget {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 24px;
-            transition: all 0.3s;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .widget:hover {
-            border-color: var(--border-hover);
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-4px);
-        }
-
-        .widget-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .widget-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            font-weight: 700;
-        }
-
-        .widget-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--accent-light);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .widget-icon i {
-            font-size: 14px;
-            color: var(--accent);
-        }
-
-        /* Currency */
-        .currency-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .currency-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 14px;
-            background: var(--bg-input);
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-
-        .currency-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .currency-name {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .currency-flag {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            background: var(--bg-card);
-        }
-
-        .currency-code {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-primary);
-        }
-
-        .currency-rate {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .rate-loading {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .currency-change {
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .currency-change.up {
-            background: var(--success-light);
-            color: var(--success);
-        }
-
-        .currency-change.down {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-
-        /* Clock */
-        .clock-display {
-            font-size: 56px;
-            font-weight: 700;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .clock-seconds {
-            font-size: 28px;
-            color: var(--accent);
-        }
-
-        .clock-date {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* System Status */
-        .status-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .status-item:last-child {
-            border-bottom: none;
-        }
-
-        .status-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .status-value {
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .status-dot.online {
-            background: var(--success);
-        }
-
-        /* Quick Links */
-        .section-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        .quick-links {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 16px;
-        }
-
-        .quick-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            padding: 28px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .quick-link:hover {
-            border-color: var(--accent);
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .quick-link-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--accent-light);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .quick-link:hover .quick-link-icon {
-            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-        }
-
-        .quick-link-icon i {
-            font-size: 24px;
-            color: var(--accent);
-            transition: color 0.3s;
-        }
-
-        .quick-link:hover .quick-link-icon i {
-            color: white;
-        }
-
-        .quick-link-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .quick-link-badge {
-            font-size: 10px;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .quick-link-badge.active {
-            background: var(--success-light);
-            color: var(--success);
-        }
-
-        .quick-link-badge.dev {
-            background: var(--warning-light);
-            color: var(--warning);
-        }
-
-        .quick-link-badge.soon {
-            background: var(--bg-input);
-            color: var(--text-muted);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .login-modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            transform: scale(0.9) translateY(20px);
-            transition: all 0.3s;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-        }
-
-        .modal-overlay.active .login-modal {
-            transform: scale(1) translateY(0);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 36px;
-            height: 36px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .login-icon {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 8px 24px var(--accent-glow);
-        }
-
-        .login-icon i {
-            font-size: 28px;
-            color: white;
-        }
-
-        .login-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .login-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 16px 18px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 15px;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px var(--accent-light);
-        }
-
-        .form-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--accent-glow);
-        }
-
-        .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--danger);
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Toast */
-        .toast-container {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            z-index: 3000;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .toast {
-            padding: 16px 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 300px;
-            box-shadow: var(--shadow-lg);
-            animation: slideIn 0.4s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--success);
-        }
-
-        .toast.info {
-            border-left: 4px solid #3b82f6;
-        }
-
-        .toast-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .toast.success .toast-icon {
-            background: var(--success-light);
-            color: var(--success);
-        }
-
-        .toast.info .toast-icon {
-            background: rgba(59, 130, 246, 0.1);
-            color: #3b82f6;
-        }
-
-        .toast-content {
-            flex: 1;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-primary);
-        }
-
-        .toast-message {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .toast-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 32px;
-            color: var(--text-muted);
-            font-size: 13px;
-            border-top: 1px solid var(--border-color);
-            margin-top: 48px;
-            background: var(--bg-secondary);
-        }
-
-        @media (max-width: 1200px) {
-            .widgets-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .quick-links {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-
-            .nav-center,
-            .theme-group {
-                display: none;
-            }
-
-            .hero-title {
-                font-size: 32px;
-            }
-
-            .widgets-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .quick-links {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
-</head>
-
-<body data-theme="light">
-    <div class="toast-container" id="toastContainer"></div>
-
-    <nav class="navbar">
-        <a href="/" class="nav-brand">
-            <div class="nav-logo"><i class="fas fa-bolt"></i></div>
-            <span class="nav-title">MAZZEL WORKS</span>
-        </a>
-        <div class="nav-center">
-            {% for link in settings.nav_links %}{% if link.enabled %}<a href="{{ link.url }}"
-                class="nav-link {% if loop.first %}active{% endif %}">{{ link.name }}</a>{% endif %}{% endfor %}
-        </div>
-        <div class="nav-right">
-            <div class="theme-group">
-                <span class="theme-label">Mod:</span>
-                <div class="theme-toggle">
-                    <button class="theme-btn light active" onclick="setMode('light')"><i
-                            class="fas fa-sun"></i></button>
-                    <button class="theme-btn dark" onclick="setMode('dark')"><i class="fas fa-moon"></i></button>
-                </div>
-                <div class="color-btns">
-                    <button class="color-btn purple active" onclick="setColor('purple')"></button>
-                    <button class="color-btn ocean" onclick="setColor('ocean')"></button>
-                    <button class="color-btn rose" onclick="setColor('rose')"></button>
-                </div>
+{% extends "base_public.html" %}
+
+{% block title %}{{ settings.site_title }}{% endblock %}
+
+{% block navbar %}
+{% include 'includes/navbar_landing.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="hero-section">
+        <div class="hero-date" id="heroDate"><i class="far fa-calendar-alt"></i> <span>--</span></div>
+        <h1 class="hero-title">{{ settings.site_title.split()[0] }} <span>{{ ' '.join(settings.site_title.split()[1:])
+                }}</span></h1>
+        <p class="hero-subtitle">{{ settings.site_subtitle }}</p>
+    </section>
+
+    <div class="widgets-grid">
+        {% if settings.show_currency %}
+        <div class="widget">
+            <div class="widget-header">
+                <span class="widget-title">Döviz Kurları (Canlı)</span>
+                <div class="widget-icon"><i class="fas fa-coins"></i></div>
             </div>
-            <span class="nav-time" id="navTime">--:--</span>
-            <button class="login-trigger" onclick="openModal()"><i class="fas fa-user"></i> Giriş Yap</button>
-        </div>
-    </nav>
-
-    <main class="main-content">
-        <div class="container">
-            <section class="hero-section">
-                <div class="hero-date" id="heroDate"><i class="far fa-calendar-alt"></i> <span>--</span></div>
-                <h1 class="hero-title">{{ settings.site_title.split()[0] }} <span>{{ '
-                        '.join(settings.site_title.split()[1:]) }}</span></h1>
-                <p class="hero-subtitle">{{ settings.site_subtitle }}</p>
-            </section>
-
-            <div class="widgets-grid">
-                {% if settings.show_currency %}
-                <div class="widget">
-                    <div class="widget-header">
-                        <span class="widget-title">Döviz Kurları (Canlı)</span>
-                        <div class="widget-icon"><i class="fas fa-coins"></i></div>
+            <div class="currency-list" id="currencyList">
+                <div class="currency-item">
+                    <div class="currency-name">
+                        <div class="currency-flag">🇺🇸</div><span class="currency-code">USD/TRY</span>
                     </div>
-                    <div class="currency-list" id="currencyList">
-                        <div class="currency-item">
-                            <div class="currency-name">
-                                <div class="currency-flag">🇺🇸</div><span class="currency-code">USD/TRY</span>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="currency-rate" id="usdRate"><span class="rate-loading">Yükleniyor...</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="currency-item">
-                            <div class="currency-name">
-                                <div class="currency-flag">🇪🇺</div><span class="currency-code">EUR/TRY</span>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="currency-rate" id="eurRate"><span class="rate-loading">Yükleniyor...</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="currency-item">
-                            <div class="currency-name">
-                                <div class="currency-flag">🇬🇧</div><span class="currency-code">GBP/TRY</span>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="currency-rate" id="gbpRate"><span class="rate-loading">Yükleniyor...</span>
-                                </div>
-                            </div>
+                    <div style="text-align: right;">
+                        <div class="currency-rate" id="usdRate"><span class="rate-loading">Yükleniyor...</span>
                         </div>
                     </div>
                 </div>
-                {% endif %}
-
-                {% if settings.show_clock %}
-                <div class="widget">
-                    <div class="widget-header">
-                        <span class="widget-title">Türkiye Saati</span>
-                        <div class="widget-icon"><i class="fas fa-clock"></i></div>
+                <div class="currency-item">
+                    <div class="currency-name">
+                        <div class="currency-flag">🇪🇺</div><span class="currency-code">EUR/TRY</span>
                     </div>
-                    <div class="clock-display"><span id="clockTime">--:--</span><span class="clock-seconds"
-                            id="clockSeconds">:--</span></div>
-                    <div class="clock-date" id="clockDate">--</div>
-                </div>
-                {% endif %}
-
-                <div class="widget">
-                    <div class="widget-header">
-                        <span class="widget-title">Sistem Durumu</span>
-                        <div class="widget-icon"><i class="fas fa-server"></i></div>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">API Server</span>
-                        <span class="status-value"><span class="status-dot online"></span> Aktif</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Gateway</span>
-                        <span class="status-value"><span class="status-dot online"></span> Aktif</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Uptime</span>
-                        <span class="status-value">99.9%</span>
+                    <div style="text-align: right;">
+                        <div class="currency-rate" id="eurRate"><span class="rate-loading">Yükleniyor...</span>
+                        </div>
                     </div>
                 </div>
-
-                <div class="widget">
-                    <div class="widget-header">
-                        <span class="widget-title">Hızlı Bilgi</span>
-                        <div class="widget-icon"><i class="fas fa-info-circle"></i></div>
+                <div class="currency-item">
+                    <div class="currency-name">
+                        <div class="currency-flag">🇬🇧</div><span class="currency-code">GBP/TRY</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Versiyon</span>
-                        <span class="status-value">1.0.0</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Sunucu</span>
-                        <span class="status-value">Vultr EU</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-label">Framework</span>
-                        <span class="status-value">Flask</span>
+                    <div style="text-align: right;">
+                        <div class="currency-rate" id="gbpRate"><span class="rate-loading">Yükleniyor...</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <h3 class="section-title"><i class="fas fa-th-large"></i> Hızlı Erişim</h3>
-            <div class="quick-links">
-                {% for module in settings.modules %}{% if module.enabled %}
-                <a href="{{ module.url }}" class="quick-link">
-                    <div class="quick-link-icon"><i class="fas {{ module.icon }}"></i></div>
-                    <span class="quick-link-title">{{ module.name }}</span>
-                    <span class="quick-link-badge {{ module.status }}">{% if module.status == 'active' %}Aktif{% elif
-                        module.status == 'dev' %}Geliştiriliyor{% else %}Yakında{% endif %}</span>
-                </a>
-                {% endif %}{% endfor %}
             </div>
         </div>
-    </main>
+        {% endif %}
 
-    <footer class="footer">© 2025 Mazzel Works. Tüm hakları saklıdır.</footer>
-
-    <div class="modal-overlay" id="loginModal">
-        <div class="login-modal">
-            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
-            <div class="login-header">
-                <div class="login-icon"><i class="fas fa-lock"></i></div>
-                <div class="login-title">Yönetici Girişi</div>
-                <div class="login-subtitle">Devam etmek için giriş yapın</div>
+        {% if settings.show_clock %}
+        <div class="widget">
+            <div class="widget-header">
+                <span class="widget-title">Türkiye Saati</span>
+                <div class="widget-icon"><i class="fas fa-clock"></i></div>
             </div>
-            {% if error %}<div class="error-msg"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>{% endif %}
-            <form method="POST" action="/login">
-                <div class="form-group"><label class="form-label">Kullanıcı Adı</label><input type="text"
-                        name="username" class="form-input" placeholder="admin" required></div>
-                <div class="form-group"><label class="form-label">Şifre</label><input type="password" name="password"
-                        class="form-input" placeholder="••••••••" required></div>
-                <button type="submit" class="login-btn"><i class="fas fa-sign-in-alt"></i> Giriş Yap</button>
-            </form>
+            <div class="clock-display"><span id="clockTime">--:--</span><span class="clock-seconds"
+                    id="clockSeconds">:--</span></div>
+            <div class="clock-date" id="clockDate">--</div>
+        </div>
+        {% endif %}
+
+        <div class="widget">
+            <div class="widget-header">
+                <span class="widget-title">Sistem Durumu</span>
+                <div class="widget-icon"><i class="fas fa-server"></i></div>
+            </div>
+            <div class="status-item">
+                <span class="status-label">API Server</span>
+                <span class="status-value"><span class="status-dot online"></span> Aktif</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Gateway</span>
+                <span class="status-value"><span class="status-dot online"></span> Aktif</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Uptime</span>
+                <span class="status-value">99.9%</span>
+            </div>
+        </div>
+
+        <div class="widget">
+            <div class="widget-header">
+                <span class="widget-title">Hızlı Bilgi</span>
+                <div class="widget-icon"><i class="fas fa-info-circle"></i></div>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Versiyon</span>
+                <span class="status-value">1.0.0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Sunucu</span>
+                <span class="status-value">Vultr EU</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Framework</span>
+                <span class="status-value">Flask</span>
+            </div>
         </div>
     </div>
 
-    <script>
-        let currentMode = 'light', currentColor = 'purple';
+    <h3 class="section-title"><i class="fas fa-th-large"></i> Hızlı Erişim</h3>
+    <div class="quick-links">
+        {% for module in settings.modules %}{% if module.enabled %}
+        <a href="{{ module.url }}" class="quick-link">
+            <div class="quick-link-icon"><i class="fas {{ module.icon }}"></i></div>
+            <span class="quick-link-title">{{ module.name }}</span>
+            <span class="quick-link-badge {{ module.status }}">{% if module.status == 'active' %}Aktif{% elif
+                module.status == 'dev' %}Geliştiriliyor{% else %}Yakında{% endif %}</span>
+        </a>
+        {% endif %}{% endfor %}
+    </div>
+</div>
 
-        function updateClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0'), m = String(now.getMinutes()).padStart(2, '0'), s = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('clockTime').textContent = `${h}:${m}`;
-            document.getElementById('clockSeconds').textContent = `:${s}`;
-            document.getElementById('navTime').textContent = `${h}:${m}`;
-            const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateStr = now.toLocaleDateString('tr-TR', opts);
-            document.getElementById('clockDate').textContent = dateStr;
-            document.querySelector('#heroDate span').textContent = dateStr.toUpperCase();
-        }
-        setInterval(updateClock, 1000); updateClock();
+<div class="modal-overlay" id="loginModal">
+    <div class="login-modal">
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        <div class="login-header">
+            <div class="login-icon"><i class="fas fa-lock"></i></div>
+            <div class="login-title">Yönetici Girişi</div>
+            <div class="login-subtitle">Devam etmek için giriş yapın</div>
+        </div>
+        {% if error %}<div class="error-msg"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>{% endif %}
+        <form method="POST" action="/login">
+            <div class="form-group"><label class="form-label">Kullanıcı Adı</label><input type="text" name="username"
+                    class="form-input" placeholder="admin" required></div>
+            <div class="form-group"><label class="form-label">Şifre</label><input type="password" name="password"
+                    class="form-input" placeholder="••••••••" required></div>
+            <button type="submit" class="login-btn"><i class="fas fa-sign-in-alt"></i> Giriş Yap</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
 
-        function setMode(mode) {
-            currentMode = mode; applyTheme();
-            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.theme-btn.${mode}`).classList.add('active');
-            localStorage.setItem('themeMode', mode);
-            showToast('success', 'Tema', mode === 'light' ? 'Açık tema' : 'Koyu tema');
-        }
+{% block extra_js %}
+<script>
+    function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0'), m = String(now.getMinutes()).padStart(2, '0'), s = String(now.getSeconds()).padStart(2, '0');
+        const clockTime = document.getElementById('clockTime');
+        const clockSeconds = document.getElementById('clockSeconds');
+        const clockDate = document.getElementById('clockDate');
+        const heroDate = document.querySelector('#heroDate span');
 
-        function setColor(color) {
-            currentColor = color; applyTheme();
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.color-btn.${color}`).classList.add('active');
-            localStorage.setItem('themeColor', color);
-        }
+        if (clockTime) clockTime.textContent = `${h}:${m}`;
+        if (clockSeconds) clockSeconds.textContent = `:${s}`;
 
-        function applyTheme() {
-            let theme = currentMode;
-            if (currentColor !== 'purple') theme = currentMode === 'dark' ? `${currentColor}-dark` : currentColor;
-            document.body.setAttribute('data-theme', theme);
-        }
+        const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateStr = now.toLocaleDateString('tr-TR', opts);
 
-        const savedMode = localStorage.getItem('themeMode') || 'light';
-        const savedColor = localStorage.getItem('themeColor') || 'purple';
-        currentMode = savedMode; currentColor = savedColor; applyTheme();
-        document.querySelector(`.theme-btn.${savedMode}`)?.classList.add('active');
-        document.querySelector(`.color-btn.${savedColor}`)?.classList.add('active');
-        document.querySelector(`.theme-btn:not(.${savedMode})`)?.classList.remove('active');
+        if (clockDate) clockDate.textContent = dateStr;
+        if (heroDate) heroDate.textContent = dateStr.toUpperCase();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-        function openModal() { document.getElementById('loginModal').classList.add('active'); }
-        function closeModal() { document.getElementById('loginModal').classList.remove('active'); }
-        document.getElementById('loginModal').addEventListener('click', e => { if (e.target === document.getElementById('loginModal')) closeModal(); });
-        {% if error %} openModal(); {% endif %}
+    function openModal() { document.getElementById('loginModal').classList.add('active'); }
+    function closeModal() { document.getElementById('loginModal').classList.remove('active'); }
+    document.getElementById('loginModal').addEventListener('click', e => { if (e.target === document.getElementById('loginModal')) closeModal(); });
+    {% if error %} openModal(); {% endif %}
 
-        function showToast(type, title, message) {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<div class="toast-icon"><i class="fas fa-${type === 'success' ? 'check' : 'info'}"></i></div><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div><button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // Fetch LIVE currency rates
-        async function fetchRates() {
-            try {
-                const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-                const data = await res.json();
-                const tryRate = data.rates.TRY;
-                document.getElementById('usdRate').textContent = tryRate.toFixed(2) + ' ₺';
-                document.getElementById('eurRate').textContent = (tryRate / data.rates.EUR).toFixed(2) + ' ₺';
-                document.getElementById('gbpRate').textContent = (tryRate / data.rates.GBP).toFixed(2) + ' ₺';
-            } catch (e) {
+    // Fetch LIVE currency rates
+    async function fetchRates() {
+        if (!document.getElementById('currencyList')) return;
+        try {
+            const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+            const data = await res.json();
+            const tryRate = data.rates.TRY;
+            document.getElementById('usdRate').textContent = tryRate.toFixed(2) + ' ₺';
+            document.getElementById('eurRate').textContent = (tryRate / data.rates.EUR).toFixed(2) + ' ₺';
+            document.getElementById('gbpRate').textContent = (tryRate / data.rates.GBP).toFixed(2) + ' ₺';
+        } catch (e) {
+            if (document.getElementById('usdRate')) {
                 document.getElementById('usdRate').textContent = 'Hata';
                 document.getElementById('eurRate').textContent = 'Hata';
                 document.getElementById('gbpRate').textContent = 'Hata';
             }
         }
-        fetchRates();
-        setInterval(fetchRates, 60000); // Refresh every minute
-    </script>
-</body>
-
-</html>
+    }
+    fetchRates();
+    setInterval(fetchRates, 60000); 
+</script>
+{% endblock %}

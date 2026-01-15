@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıtlı Projeler | Mazzel OS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .projects-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 20px;
+    }
+
+    .project-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 24px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .project-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .project-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .project-icon {
+        width: 52px;
+        height: 52px;
+        background: var(--accent-light);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .project-icon i {
+        font-size: 22px;
+        color: var(--accent);
+    }
+
+    .project-status {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .project-status.completed {
+        background: var(--success-light);
+        color: var(--success);
+    }
+
+    .project-status.in_progress {
+        background: var(--warning-light);
+        color: var(--warning);
+    }
+
+    .project-status.draft {
+        background: var(--bg-input);
+        color: var(--text-muted);
+    }
+
+    .project-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .project-customer {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+    }
+
+    .project-stats {
+        display: flex;
+        gap: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .project-stat {
+        text-align: center;
+        flex: 1;
+    }
+
+    .project-stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .project-stat-label {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .project-date {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 12px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        color: var(--text-muted);
+        opacity: 0.3;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: var(--text-muted);
+        margin-bottom: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="projects-header">
+    <h1 class="page-title">Kayıtlı Nesting Projeleri</h1>
+    <a href="/nesting/" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Proje
+    </a>
+</div>
+
+{% if projects and projects|length > 0 %}
+<div class="projects-grid" id="projectsGrid">
+    {% for project in projects %}
+    <div class="project-card" data-id="{{ project.id }}">
+        <div class="project-card-header">
+            <div class="project-icon"><i class="fas fa-layer-group"></i></div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="project-status {{ project.status or 'draft' }}">
+                    {% if project.status == 'completed' %}Tamamlandı
+                    {% elif project.status == 'in_progress' %}Devam Ediyor
+                    {% else %}Taslak{% endif %}
+                </span>
+                <button class="delete-project-btn" data-id="{{ project.id }}" data-name="{{ project.name }}" title="Sil"
+                    style="
+                    background: rgba(239,68,68,0.1);
+                    border: 1px solid rgba(239,68,68,0.3);
+                    border-radius: 6px;
+                    color: #ef4444;
+                    padding: 4px 8px;
+                    cursor: pointer;
+                    font-size: 12px;
+                "><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+        <div class="project-name">{{ project.name or 'Adsız Proje' }}</div>
+        <div class="project-customer">
+            <i class="fas fa-cube"></i> {{ project.modules|length if project.modules else 0 }} Modül
+        </div>
+        <div class="project-stats">
+            <div class="project-stat">
+                <div class="project-stat-value">{{ project.modules|length if project.modules else 0 }}</div>
+                <div class="project-stat-label">Modül</div>
+            </div>
+            <div class="project-stat">
+                <div class="project-stat-value">
+                    {% set total_parts = 0 %}
+                    {% for mod in project.modules or [] %}
+                    {% set total_parts = total_parts + (mod.parts|length if mod.parts else 0) %}
+                    {% endfor %}
+                    {{ total_parts }}
+                </div>
+                <div class="project-stat-label">Parça</div>
+            </div>
+        </div>
+        <div class="project-date"><i class="far fa-calendar"></i> {{ project.created_at or '-' }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state" id="emptyState">
+    <i class="fas fa-folder-open"></i>
+    <h3>Henüz proje yok</h3>
+    <p>İlk nesting projenizi oluşturmak için "Yeni Proje" butonuna tıklayın.</p>
+    <a href="/nesting/" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Proje Oluştur
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Click on card to open project
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', function (e) {
+                if (e.target.closest('.delete-project-btn')) return;
+                const projectId = this.dataset.id;
+                window.location = '/nesting/?project=' + projectId;
+            });
+        });
+
+        // Delete button handlers
+        document.querySelectorAll('.delete-project-btn').forEach(btn => {
+            btn.addEventListener('click', async function (e) {
+                e.stopPropagation();
+                const projectId = this.dataset.id;
+                const projectName = this.dataset.name || 'Bu proje';
+
+                const confirmed = await confirmDelete(`"${projectName}" projesi`);
+                if (confirmed) {
+                    try {
+                        const response = await fetch(`/api/nesting/project/${projectId}`, {
+                            method: 'DELETE'
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            Toast.success('Proje silindi');
+                            setTimeout(() => location.reload(), 500);
+                        } else {
+                            Toast.error('Silme işlemi başarısız');
+                        }
+                    } catch (error) {
+                        console.error('Delete error:', error);
+                        Toast.error('Sunucu hatası');
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -33,6 +33,7 @@ print("\n📤 [2/4] Dosyalar yukleniyor...")
 script_dir = os.path.dirname(os.path.abspath(__file__))
 run_command(f'scp "{os.path.join(script_dir, "app.py")}" {USER}@{SERVER_IP}:{REMOTE_PATH}/')
 run_command(f'scp -r "{os.path.join(script_dir, "templates")}" {USER}@{SERVER_IP}:{REMOTE_PATH}/')
+run_command(f'scp -r "{os.path.join(script_dir, "static")}" {USER}@{SERVER_IP}:{REMOTE_PATH}/')
 
 # 3. Gerekli paketleri kur ve Servisi olustur
 print("\n⚙️  [3/4] Sunucu ayarlari yapiliyor...")

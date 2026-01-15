@@ -1,0 +1,683 @@
+{% extends "base.html" %}
+
+{% block title %}Malzemeler | Mazzel OS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-title h1 {
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .page-title .count {
+        background: var(--accent);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .category-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .category-tab {
+        padding: 10px 18px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .category-tab:hover {
+        border-color: var(--accent);
+    }
+
+    .category-tab.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
+    .search-input {
+        padding: 10px 16px;
+        padding-left: 40px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 14px;
+        width: 250px;
+        margin-left: auto;
+    }
+
+    .search-wrap {
+        position: relative;
+        margin-left: auto;
+    }
+
+    .search-wrap i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+
+    /* Materials Grid */
+    .materials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+    }
+
+    .material-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px;
+        transition: all 0.2s;
+    }
+
+    .material-card:hover {
+        border-color: var(--accent);
+    }
+
+    .material-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 14px;
+    }
+
+    .material-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+    }
+
+    .material-main {
+        flex: 1;
+    }
+
+    .material-name {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .material-brand {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .material-category {
+        padding: 4px 10px;
+        background: var(--bg-input);
+        border-radius: 20px;
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .material-specs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 14px 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        margin: 14px 0;
+    }
+
+    .spec-item {
+        text-align: center;
+    }
+
+    .spec-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .spec-label {
+        font-size: 10px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+    }
+
+    .material-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .material-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .material-price small {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .material-stock {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+    }
+
+    .stock-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .stock-dot.high {
+        background: #22c55e;
+    }
+
+    .stock-dot.medium {
+        background: #f59e0b;
+    }
+
+    .stock-dot.low {
+        background: #ef4444;
+    }
+
+    .material-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .material-actions button {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .material-actions button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .material-actions button.danger:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s;
+    }
+
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-box {
+        background: var(--bg-card);
+        border-radius: 20px;
+        width: 600px;
+        max-width: 95vw;
+        max-height: 90vh;
+        overflow: hidden;
+        transform: scale(0.9);
+        transition: transform 0.3s;
+    }
+
+    .modal-overlay.show .modal-box {
+        transform: scale(1);
+    }
+
+    .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .modal-body {
+        padding: 24px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 14px;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Add/Edit Material Modal -->
+<div class="modal-overlay" id="materialModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-layer-group" style="color: var(--accent);"></i> <span id="modalTitle">Yeni
+                    Malzeme</span></h3>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="materialId">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="matCategory">
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Marka</label>
+                    <input type="text" id="matBrand" placeholder="Kastamonu, AGT...">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Malzeme Adı</label>
+                <input type="text" id="matName" placeholder="18mm Beyaz Melamin MDF">
+            </div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: var(--text-muted);"><i
+                    class="fas fa-ruler-combined"></i> Boyutlar</h4>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Kalınlık (mm)</label>
+                    <input type="number" id="matThickness" placeholder="18">
+                </div>
+                <div class="form-group">
+                    <label>En (mm)</label>
+                    <input type="number" id="matWidth" placeholder="2100">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Boy (mm)</label>
+                <input type="number" id="matHeight" placeholder="2800">
+            </div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: var(--text-muted);"><i class="fas fa-palette"></i>
+                Özellikler</h4>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Renk</label>
+                    <input type="text" id="matColor" placeholder="Beyaz, Meşe, Ceviz...">
+                </div>
+                <div class="form-group">
+                    <label>Desen</label>
+                    <select id="matPattern">
+                        <option value="Düz">Düz</option>
+                        <option value="Ahşap Desen">Ahşap Desen</option>
+                        <option value="Mermer">Mermer</option>
+                        <option value="Beton">Beton</option>
+                    </select>
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: var(--text-muted);"><i class="fas fa-tag"></i>
+                Fiyatlandırma</h4>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Alış Fiyatı (₺)</label>
+                    <input type="number" id="matPurchasePrice" placeholder="750">
+                </div>
+                <div class="form-group">
+                    <label>Satış Fiyatı (₺)</label>
+                    <input type="number" id="matSalePrice" placeholder="850">
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: var(--text-muted);"><i class="fas fa-warehouse"></i>
+                Stok</h4>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Mevcut Stok</label>
+                    <input type="number" id="matStock" placeholder="45">
+                </div>
+                <div class="form-group">
+                    <label>Minimum Stok</label>
+                    <input type="number" id="matMinStock" placeholder="10">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+            <button class="btn btn-primary" onclick="saveMaterial()"><i class="fas fa-save"></i> Kaydet</button>
+        </div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="page-title">
+        <h1><i class="fas fa-layer-group" style="color: var(--accent);"></i> Malzemeler</h1>
+        <span class="count" id="materialCount">{{ materials|length }}</span>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">
+        <i class="fas fa-plus"></i> Yeni Malzeme
+    </button>
+</div>
+
+<div class="filter-bar">
+    <div class="category-tabs">
+        <button class="category-tab active" onclick="filterByCategory(null, this)">Tümü</button>
+        {% for cat in categories %}
+        <button class="category-tab" onclick="filterByCategory('{{ cat.id }}', this)">{{ cat.name }}</button>
+        {% endfor %}
+    </div>
+    <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Malzeme ara..."
+            oninput="filterMaterials()">
+    </div>
+</div>
+
+<div class="materials-grid" id="materialsGrid">
+    {% for m in materials %}
+    <div class="material-card" data-id="{{ m.id }}" data-category="{{ m.category }}" data-name="{{ m.name|lower }}">
+        <div class="material-header">
+            <div class="material-icon"><i class="fas fa-th-large"></i></div>
+            <div class="material-main">
+                <div class="material-name">{{ m.name }}</div>
+                <div class="material-brand">{{ m.brand }}</div>
+            </div>
+            <span class="material-category">{{ m.category }}</span>
+        </div>
+        <div class="material-specs">
+            <div class="spec-item">
+                <div class="spec-value">{{ m.dimensions.thickness if m.dimensions else '-' }}</div>
+                <div class="spec-label">Kalınlık</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">{{ m.dimensions.width if m.dimensions else '-' }}</div>
+                <div class="spec-label">En</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">{{ m.dimensions.height if m.dimensions else '-' }}</div>
+                <div class="spec-label">Boy</div>
+            </div>
+        </div>
+        <div class="material-bottom">
+            <div class="material-price">
+                {{ m.pricing.sale_price if m.pricing else 0 }}₺ <small>/plaka</small>
+            </div>
+            <div class="material-stock">
+                {% set stock = m.stock.quantity if m.stock else 0 %}
+                {% set min_stock = m.stock.min_stock if m.stock else 10 %}
+                <span
+                    class="stock-dot {{ 'high' if stock > min_stock * 2 else ('medium' if stock > min_stock else 'low') }}"></span>
+                {{ stock }} adet
+            </div>
+        </div>
+        <div class="material-actions">
+            <button onclick="editMaterial('{{ m.id }}')"><i class="fas fa-edit"></i> Düzenle</button>
+            <button class="danger" onclick="deleteMaterial('{{ m.id }}')"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const materialsData = {{ materials | tojson | safe }};
+    let activeCategory = null;
+
+    function openAddModal() {
+        document.getElementById('modalTitle').textContent = 'Yeni Malzeme';
+        document.getElementById('materialId').value = '';
+        clearForm();
+        document.getElementById('materialModal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('materialModal').classList.remove('show');
+    }
+
+    function clearForm() {
+        ['matName', 'matBrand', 'matThickness', 'matWidth', 'matHeight',
+            'matColor', 'matPurchasePrice', 'matSalePrice', 'matStock', 'matMinStock'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+    }
+
+    function editMaterial(id) {
+        const m = materialsData.find(x => x.id === id);
+        if (!m) return;
+
+        document.getElementById('modalTitle').textContent = 'Malzeme Düzenle';
+        document.getElementById('materialId').value = m.id;
+        document.getElementById('matCategory').value = m.category || 'mdf';
+        document.getElementById('matBrand').value = m.brand || '';
+        document.getElementById('matName').value = m.name || '';
+        document.getElementById('matThickness').value = m.dimensions?.thickness || '';
+        document.getElementById('matWidth').value = m.dimensions?.width || '';
+        document.getElementById('matHeight').value = m.dimensions?.height || '';
+        document.getElementById('matColor').value = m.properties?.color || '';
+        document.getElementById('matPattern').value = m.properties?.pattern || 'Düz';
+        document.getElementById('matPurchasePrice').value = m.pricing?.purchase_price || '';
+        document.getElementById('matSalePrice').value = m.pricing?.sale_price || '';
+        document.getElementById('matStock').value = m.stock?.quantity || '';
+        document.getElementById('matMinStock').value = m.stock?.min_stock || '';
+
+        document.getElementById('materialModal').classList.add('show');
+    }
+
+    function saveMaterial() {
+        const id = document.getElementById('materialId').value;
+        const data = {
+            category: document.getElementById('matCategory').value,
+            brand: document.getElementById('matBrand').value,
+            name: document.getElementById('matName').value,
+            dimensions: {
+                thickness: parseInt(document.getElementById('matThickness').value) || 0,
+                width: parseInt(document.getElementById('matWidth').value) || 0,
+                height: parseInt(document.getElementById('matHeight').value) || 0
+            },
+            properties: {
+                color: document.getElementById('matColor').value,
+                pattern: document.getElementById('matPattern').value,
+                surface: 'Mat'
+            },
+            pricing: {
+                purchase_price: parseInt(document.getElementById('matPurchasePrice').value) || 0,
+                sale_price: parseInt(document.getElementById('matSalePrice').value) || 0,
+                vat_rate: 20
+            },
+            stock: {
+                quantity: parseInt(document.getElementById('matStock').value) || 0,
+                min_stock: parseInt(document.getElementById('matMinStock').value) || 10
+            }
+        };
+
+        if (!data.name) {
+            Toast.warning('Malzeme adı gerekli!');
+            return;
+        }
+
+        const url = id ? `/api/materials/${id}` : '/api/materials';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(r => r.json())
+            .then(result => {
+                if (result.success) {
+                    Toast.success('Malzeme kaydedildi!');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    Toast.error('Hata: ' + result.error);
+                }
+            })
+            .catch(e => Toast.error('Kaydetme hatası: ' + e));
+    }
+
+    function deleteMaterial(id) {
+        const m = materialsData.find(x => x.id === id);
+        confirmDelete(m?.name || 'Bu malzeme').then(confirmed => {
+            if (!confirmed) return;
+
+            fetch(`/api/materials/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(result => {
+                    if (result.success) {
+                        Toast.success('Malzeme silindi!');
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                });
+        });
+    }
+
+    function filterByCategory(category, btn) {
+        activeCategory = category;
+
+        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+
+        filterMaterials();
+    }
+
+    function filterMaterials() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.material-card');
+        let visible = 0;
+
+        cards.forEach(card => {
+            const name = card.dataset.name || '';
+            const category = card.dataset.category || '';
+
+            const matchesSearch = name.includes(search);
+            const matchesCategory = !activeCategory || category === activeCategory;
+
+            if (matchesSearch && matchesCategory) {
+                card.style.display = '';
+                visible++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('materialCount').textContent = visible;
+    }
+
+    // Close modal on overlay click
+    document.getElementById('materialModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+{% endblock %}

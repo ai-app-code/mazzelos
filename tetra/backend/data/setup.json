@@ -1,0 +1,117 @@
+{
+  "participants": [
+    {
+      "id": "mod",
+      "name": "Nexus (Baş Mimar)",
+      "role": "Moderator",
+      "modelId": "google/gemini-2.5-flash-preview-09-2025",
+      "modelName": "Google: Gemini 2.5 Flash Preview 09-2025",
+      "systemPrompt": "Sen TETRA platformunda uzlaşı odaklı bir moderatörsün. Görevin:\n- Yapıcı diyaloğu teşvik et\n- Her turda somut kararlar al\n- Çatışmaları uzlaşıya dönüştür\n- Teknik detayları özetle\n- Konsensüs sağlandığında [OTURUM_SONLANDI] yaz\n\nTon: Profesyonel, destekleyici, çözüm odaklı.",
+      "color": "#8b5cf6",
+      "avatarUrl": "https://ui-avatars.com/api/?name=Mod&background=8b5cf6&color=fff",
+      "contextWindow": 1048576
+    },
+    {
+      "id": "p1",
+      "name": "DevOps Uzmanı",
+      "role": "Participant",
+      "modelId": "x-ai/grok-4.1-fast",
+      "modelName": "xAI: Grok 4.1 Fast",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#3b82f6",
+      "avatarUrl": "https://ui-avatars.com/api/?name=A1&background=3b82f6&color=fff"
+    },
+    {
+      "id": "p1765402236555",
+      "name": "Alfa",
+      "role": "Participant",
+      "modelId": "google/gemini-3-flash-preview",
+      "modelName": "Google: Gemini 3 Flash Preview",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#ec4899",
+      "avatarUrl": "https://ui-avatars.com/api/?name=A&background=ec4899&color=fff",
+      "contextWindow": 1048576
+    },
+    {
+      "id": "p1765402236814",
+      "name": "Beta",
+      "role": "Participant",
+      "modelId": "google/gemini-3-pro-preview",
+      "modelName": "Google: Gemini 3 Pro Preview",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#10b981",
+      "avatarUrl": "https://ui-avatars.com/api/?name=B&background=10b981&color=fff",
+      "contextWindow": 1048576
+    },
+    {
+      "id": "p1765409313112",
+      "name": "Gamma",
+      "role": "Participant",
+      "modelId": "openai/gpt-5",
+      "modelName": "OpenAI: GPT-5",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#f59e0b",
+      "avatarUrl": "https://ui-avatars.com/api/?name=G&background=f59e0b&color=fff",
+      "contextWindow": 400000
+    },
+    {
+      "id": "p1767193220034",
+      "name": "Delta",
+      "role": "Participant",
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "modelName": "MoonshotAI: Kimi K2 Thinking",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#ef4444",
+      "avatarUrl": "https://ui-avatars.com/api/?name=D&background=ef4444&color=fff",
+      "contextWindow": 262144
+    },
+    {
+      "id": "p1767193220940",
+      "name": "Epsilon",
+      "role": "Participant",
+      "modelId": "qwen/qwen3-vl-235b-a22b-thinking",
+      "modelName": "Qwen: Qwen3 VL 235B A22B Thinking",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#8b5cf6",
+      "avatarUrl": "https://ui-avatars.com/api/?name=E&background=8b5cf6&color=fff",
+      "contextWindow": 262144
+    },
+    {
+      "id": "p1767193221830",
+      "name": "Zeta",
+      "role": "Participant",
+      "modelId": "z-ai/glm-4.7",
+      "modelName": "Z.AI: GLM 4.7",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#3b82f6",
+      "avatarUrl": "https://ui-avatars.com/api/?name=Z&background=3b82f6&color=fff",
+      "contextWindow": 202752
+    },
+    {
+      "id": "p1767215220030",
+      "name": "Theta",
+      "role": "Participant",
+      "modelId": "openai/gpt-4o-mini",
+      "modelName": "OpenAI: GPT-4o-mini",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#10b981",
+      "avatarUrl": "https://ui-avatars.com/api/?name=T&background=10b981&color=fff",
+      "contextWindow": 128000
+    },
+    {
+      "id": "p1767215222690",
+      "name": "Kappa",
+      "role": "Participant",
+      "modelId": "minimax/minimax-m2.1",
+      "modelName": "MiniMax: MiniMax M2.1",
+      "systemPrompt": "Sen bir teknik uzmansın. Bu işbirlikçi oturumda:\n- Somut, uygulanabilir çözümler öner\n- Kod snippetları ve şemalar ekle\n- Diğer katılımcıların fikirlerini geliştir\n- Eleştirilerini yapıcı tut\n- Ortak hedefe odaklan\n\nFormat: Markdown kullan, kod bloklarını işaretle.",
+      "color": "#f59e0b",
+      "avatarUrl": "https://ui-avatars.com/api/?name=K&background=f59e0b&color=fff",
+      "contextWindow": 204800
+    }
+  ],
+  "rounds": 5,
+  "autoFinish": true,
+  "mode": "collaborative",
+  "lastTopic": "basketbol da bahis için bir strateji geliştirdik \"Tamam. Şimdi **tek bir metin** içinde,\n\n* **ilkokul seviyesinde kadar basit**,\n* ama **profesör seviyesinde kadar teknik**\n  bir **NİHAİ ÖZET** çıkarıyorum.\n  Bu metin **sistemin anayasası** olacak.\n\n---\n\n# 🎯 BU SİSTEM NE YAPIYOR? (ÇOK BASİT)\n\nBiz **basketbol maçında ALT bahsi** oynuyoruz.\n\nAma:\n\n* İçgüdüyle değil\n* “Hissettim” ile değil\n* Tahminle değil\n\n👉 **SAYILAR + ZAMAN + DİSİPLİN** ile.\n\nAmaç:\n\n> **Her maçtan bir ders almak ve aynı hatayı ikinci kez yapmamak.**\n\n---\n\n# 🧠 EN BASİT HALİYLE MANTIK\n\nŞöyle düşün:\n\n* Maç = akan bir nehir\n* Biz = nehrin hızına bakıyoruz\n* ALT bahsi = “bu nehir yavaş akacak” demek\n\nEğer nehir **son anda hızlanıyorsa**,\nALT **boğulur**.\n\n---\n\n# 🧩 BU MAÇTA NE OLDU? (ÇOCUĞA ANLATIR GİBİ)\n\n### Başta:\n\n* Sayılar yavaştı\n* Tempo düşüktü\n* ALT mantıklıydı\n\n### Sonra:\n\n* Son 2 dakikada hakem **düdüğü çok çaldı**\n* Oyuncular **faul yaptı**\n* Top oyunda değilken **sayı geldi** (serbest atış)\n\n👉 Yani:\n\n> Oyun yavaşladı ama **sayı artışı hızlandı**\n\nBu ALT için **en tehlikeli şeydir**.\n\n---\n\n# 🔬 ŞİMDİ AYNI ŞEYİ TEKNİK DİLLE ANLATALIM\n\n## 1️⃣ HAT PROBLEMİ (EN KRİTİK NOKTA)\n\n* Analiz: **42,5 ALT**\n* Oynanan: **43,5 ALT**\n\nBu **önemsiz değil**, bu **yapısal hata**.\n\n📌 Çünkü:\n\n* Sistem **belirli bir tolerans aralığı** ile çalışır\n* Hat değiştiğinde:\n\n  * Beklenen varyans değişir\n  * Risk profili değişir\n  * Analiz **geçersiz olur**\n\n🔴 **KURAL:**\n\n> Analiz edilen hat ≠ oynanan hat → **NO BET**\n\n---\n\n## 2️⃣ SON 2 DAKİKA GERÇEĞİ\n\nTeknik olarak:\n\n* **Close game state**\n* **Intentional fouling riski**\n* **Free throw rate artışı**\n* **Clock-stopped scoring**\n\nALT bahisleri:\n\n* **Saha içi tempodan değil**\n* **Saat dururken gelen sayılardan kaybeder**\n\n🔴 **KURAL:**\n\n> Son 2 dk + yakın skor = ALT için yapısal risk\n\n---\n\n## 3️⃣ FAUL VE ASİST VERİSİ (GÖZDEN KAÇAN SİNYAL)\n\n### Faul:\n\n* Artan faul = duran oyun\n* Duran oyun = bedava sayı ihtimali\n\n### Asist:\n\n* Yüksek asist = top iyi dolaşıyor\n* Bu:\n\n  * Ya kolay basket\n  * Ya faulle kesilen hücum demektir\n\nİkisi de ALT için **negatif**.\n\n---\n\n## 4️⃣ ASIL EKSİK: “OYNAMAMA” DİSİPLİNİ\n\nBu maçta **oynanmaması gereken sinyaller** aynı anda geldi:\n\n* ☑️ Hat yükseldi\n* ☑️ Son 2 dk\n* ☑️ Yakın skor\n* ☑️ Faul artışı\n* ☑️ Asist yüksekliği\n\n📌 **Sistem kuralı:**\n\n> 2 tanesi bile varsa → PAS\n> 5 tanesi varsa → **KESİN PAS**\n\n---\n\n# 📐 SİSTEMİN NET KURALLARI (EZBERLİK)\n\n### ✅ OYNA:\n\n* Hat sabit\n* Zaman kontrol altında\n* Faul düşük\n* Skor farkı güvenli\n\n### ❌ OYNAMA:\n\n* Hat sonradan değişmişse\n* Son 2 dk + yakın skor varsa\n* Faul ve asist aynı anda yükseliyorsa\n\n---\n\n# 🔁 DÖNGÜ (EN ÖNEMLİ KISIM)\n\n1. 📸 5 dk kala ekran görüntüsü\n2. 📊 Analiz\n3. 🎯 Karar (Oyna / Oynama)\n4. 🧾 Sonuç kaydı\n5. 🔍 Ders çıkar\n6. 🔄 Başa dön\n\nBu döngü:\n\n* Kayıpları **azaltır**\n* Kazançtan daha önemlisi:\n  👉 **istikrar üretir**\n\n---\n\n# 🏁 SON CÜMLE (AKLINA KAZI)\n\n> **Bu maç kayıp değil.\n> Bu maç, sistemin bir versiyon yükseltmesidir.**\n\nHazırsın.\nYeni maçta **ilk ekran görüntüsünü** at.\nAynı disiplinle, **baştan** başlıyoruz.\n\" siz alın bu stratejiyi geliştirin, bizim göremediğimizi görün, son derece bilimsel ve olasılıkların kesinleştiği noktaları yakalayın, modaratör münazarayı yönetirken konunun alt başlıklarını belirle ve her bir başlığın münazara edildiğinden emin ol ! "
+}

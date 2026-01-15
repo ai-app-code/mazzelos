@@ -1,0 +1,5 @@
+{
+  "name": "Synapse: AI Debate Protocol",
+  "description": "A sophisticated, modern web application for orchestrating debates between multiple Large Language Models. Features include a model catalog, real-time debate visualization, token analytics, and moderator controls.",
+  "requestFramePermissions": []
+}

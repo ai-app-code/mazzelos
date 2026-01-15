@@ -1,0 +1,20 @@
+<nav class="navbar">
+    <a href="/" class="nav-brand">
+        <div class="nav-logo"><i class="fas fa-bolt"></i></div><span class="nav-title">MAZZEL WORKS</span>
+    </a>
+    <div class="nav-links">
+        <a href="/" class="nav-link">Ana Sayfa</a>
+        <a href="/hizmetler" class="nav-link {% if request.path == '/hizmetler' %}active{% endif %}">Hizmetler</a>
+        <a href="/referanslar" class="nav-link {% if request.path == '/referanslar' %}active{% endif %}">Referanslar</a>
+        <a href="/iletisim" class="nav-link {% if request.path == '/iletisim' %}active{% endif %}">İletişim</a>
+    </div>
+    <div class="nav-right">
+        <div class="theme-group">
+            <button class="theme-btn light active" onclick="setMode('light')"><i class="fas fa-sun"></i></button>
+            <button class="theme-btn dark" onclick="setMode('dark')"><i class="fas fa-moon"></i></button>
+            <button class="color-btn purple active" onclick="setColor('purple')"></button>
+            <button class="color-btn ocean" onclick="setColor('ocean')"></button>
+            <button class="color-btn rose" onclick="setColor('rose')"></button>
+        </div>
+    </div>
+</nav>

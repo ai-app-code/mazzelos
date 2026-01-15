@@ -1,0 +1,5 @@
+{
+  "name": "Nexus Debate AI",
+  "description": "A sophisticated, high-performance AI debate platform. Orchestrate multi-agent debates between top-tier LLMs (Gemini, GPT-4, Claude) with real-time analytics, moderator control, and aesthetic visualization.",
+  "requestFramePermissions": []
+}

@@ -27,3 +27,14 @@ Thumbs.db
 
 # Logs
 *.log
+
+# TETRA (Node.js)
+node_modules/
+tetra/app/dist/
+tetra/**/.env*
+tetra/backend/data/keys.json
+tetra/backend/data/history.json
+tetra/backend/data/archives.json
+tetra/backend/data/cached_models.json
+tetra/backend/data/pool.json
+!tetra/**/.env*.example

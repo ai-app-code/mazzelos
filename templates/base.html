@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mazzel OS{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body data-theme="light">
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        {% include 'includes/header.html' %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Theme JS -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <!-- UI Components (Toast, Confirm) -->
+    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

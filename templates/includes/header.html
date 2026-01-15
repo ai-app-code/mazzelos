@@ -1,0 +1,22 @@
+<header class="page-header">
+    <div class="header-left">
+        <div class="welcome-text">Hoş geldin, {{ user }}! 👋</div>
+        <h1 class="page-title">{{ page_title|default('Mazzel OS') }}</h1>
+    </div>
+    <div class="header-right">
+        <div class="theme-group">
+            <span class="theme-label">Tema:</span>
+            <div class="theme-toggle">
+                <button class="theme-btn light active" onclick="setMode('light')" title="Açık"><i
+                        class="fas fa-sun"></i></button>
+                <button class="theme-btn dark" onclick="setMode('dark')" title="Koyu"><i
+                        class="fas fa-moon"></i></button>
+            </div>
+            <div class="color-btns">
+                <button class="color-btn purple active" onclick="setColor('purple')"></button>
+                <button class="color-btn ocean" onclick="setColor('ocean')"></button>
+                <button class="color-btn rose" onclick="setColor('rose')"></button>
+            </div>
+        </div>
+    </div>
+</header>

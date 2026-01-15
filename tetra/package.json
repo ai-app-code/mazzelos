@@ -1,0 +1,19 @@
+{
+  "name": "tetra-monorepo",
+  "version": "1.2.1",
+  "description": "TETRA AI Debate Protocol - Frontend + Backend",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd app && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:frontend": "cd app && npm run preview",
+    "start:backend": "cd backend && npm start",
+    "install:all": "npm install && cd app && npm install && cd ../backend && npm install",
+    "build": "cd app && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

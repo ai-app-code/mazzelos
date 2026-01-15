@@ -1,0 +1,317 @@
+{
+    "customers": [
+        {
+            "id": "cust_001",
+            "type": "company",
+            "company_name": "ABC Mobilya",
+            "tax_number": "1234567890",
+            "tax_office": "Kadıköy",
+            "contact": {
+                "name": "Ahmet Yılmaz",
+                "phone": "0532 111 22 33",
+                "email": "ahmet@abcmobilya.com",
+                "position": "Satın Alma Müdürü"
+            },
+            "address": {
+                "street": "Sanayi Cad. No:45",
+                "district": "Ümraniye",
+                "city": "İstanbul"
+            },
+            "sites": [
+                {
+                    "id": "site_001",
+                    "name": "Ataşehir Projesi",
+                    "address": "Ataşehir Bulvarı No:123",
+                    "contact_person": "Mehmet Usta",
+                    "phone": "0533 222 33 44"
+                }
+            ],
+            "payment": {
+                "method": "transfer",
+                "term_days": 30
+            },
+            "tags": [
+                "vip",
+                "mobilya"
+            ],
+            "notes": "Her ay düzenli sipariş veriyor",
+            "created_at": "2024-01-15",
+            "status": "active"
+        },
+        {
+            "id": "cust_002",
+            "type": "company",
+            "company_name": "XYZ İnşaat",
+            "tax_number": "9876543210",
+            "tax_office": "Maltepe",
+            "contact": {
+                "name": "Fatma Demir",
+                "phone": "0544 555 66 77",
+                "email": "fatma@xyzinsaat.com",
+                "position": "Proje Müdürü"
+            },
+            "address": {
+                "street": "İnşaat Sok. No:12",
+                "district": "Kartal",
+                "city": "İstanbul"
+            },
+            "sites": [],
+            "payment": {
+                "method": "check",
+                "term_days": 45
+            },
+            "tags": [
+                "inşaat"
+            ],
+            "notes": "",
+            "created_at": "2024-03-20",
+            "status": "active"
+        }
+    ],
+    "materials": [
+        {
+            "id": "mat_001",
+            "category": "mdf",
+            "name": "18mm Beyaz Melamin MDF",
+            "brand": "Kastamonu",
+            "dimensions": {
+                "thickness": 18,
+                "width": 2100,
+                "height": 2800
+            },
+            "properties": {
+                "color": "Beyaz",
+                "pattern": "Düz",
+                "surface": "Mat"
+            },
+            "pricing": {
+                "purchase_price": 750,
+                "sale_price": 850,
+                "vat_rate": 20
+            },
+            "stock": {
+                "quantity": 45,
+                "min_stock": 10
+            },
+            "status": "active"
+        },
+        {
+            "id": "mat_002",
+            "category": "mdf",
+            "name": "18mm Siyah Melamin MDF",
+            "brand": "Kastamonu",
+            "dimensions": {
+                "thickness": 18,
+                "width": 2100,
+                "height": 2800
+            },
+            "properties": {
+                "color": "Siyah",
+                "pattern": "Düz",
+                "surface": "Mat"
+            },
+            "pricing": {
+                "purchase_price": 800,
+                "sale_price": 920,
+                "vat_rate": 20
+            },
+            "stock": {
+                "quantity": 30,
+                "min_stock": 5
+            },
+            "status": "active"
+        },
+        {
+            "id": "mat_003",
+            "category": "mdf",
+            "name": "25mm Meşe Desen MDF",
+            "brand": "AGT",
+            "dimensions": {
+                "thickness": 25,
+                "width": 2100,
+                "height": 2800
+            },
+            "properties": {
+                "color": "Meşe",
+                "pattern": "Ahşap Desen",
+                "surface": "Mat"
+            },
+            "pricing": {
+                "purchase_price": 1000,
+                "sale_price": 1150,
+                "vat_rate": 20
+            },
+            "stock": {
+                "quantity": 20,
+                "min_stock": 5
+            },
+            "status": "active"
+        },
+        {
+            "id": "mat_004",
+            "category": "mdf",
+            "name": "8mm Ham MDF",
+            "brand": "Yıldız",
+            "dimensions": {
+                "thickness": 8,
+                "width": 1220,
+                "height": 2440
+            },
+            "properties": {
+                "color": "Ham",
+                "pattern": "Düz",
+                "surface": "Ham"
+            },
+            "pricing": {
+                "purchase_price": 220,
+                "sale_price": 280,
+                "vat_rate": 20
+            },
+            "stock": {
+                "quantity": 100,
+                "min_stock": 20
+            },
+            "status": "active"
+        },
+        {
+            "id": "mat_005",
+            "category": "suntalam",
+            "name": "18mm Beyaz Suntalam",
+            "brand": "Starwood",
+            "dimensions": {
+                "thickness": 18,
+                "width": 2100,
+                "height": 2800
+            },
+            "properties": {
+                "color": "Beyaz",
+                "pattern": "Düz",
+                "surface": "Mat"
+            },
+            "pricing": {
+                "purchase_price": 550,
+                "sale_price": 650,
+                "vat_rate": 20
+            },
+            "stock": {
+                "quantity": 60,
+                "min_stock": 15
+            },
+            "status": "active"
+        },
+        {
+            "id": "mat_006",
+            "category": "kontraplak",
+            "name": "18mm Kayın Kontraplak",
+            "brand": "Import",
+            "dimensions": {
+                "thickness": 18,
+                "width": 1220,
+                "height": 2440
+            },
+            "properties": {
+                "color": "Doğal Kayın",
+                "pattern": "Ahşap",
+                "surface": "Ham"
+            },
+            "pricing": {
+                "purchase_price": 1200,
+                "sale_price": 1400,
+                "vat_rate": 20
+            },
+            "stock": {
+                "quantity": 15,
+                "min_stock": 5
+            },
+            "status": "active"
+        },
+        {
+            "id": "mat_007",
+            "category": "osb",
+            "name": "18mm OSB-3",
+            "brand": "Kronospan",
+            "dimensions": {
+                "thickness": 18,
+                "width": 1250,
+                "height": 2500
+            },
+            "properties": {
+                "color": "Doğal",
+                "pattern": "OSB",
+                "surface": "Ham"
+            },
+            "pricing": {
+                "purchase_price": 400,
+                "sale_price": 480,
+                "vat_rate": 20
+            },
+            "stock": {
+                "quantity": 80,
+                "min_stock": 20
+            },
+            "status": "active"
+        }
+    ],
+    "edge_bands": [
+        {
+            "id": "edge_001",
+            "name": "0.8mm Beyaz PVC",
+            "thickness": 0.8,
+            "width": 22,
+            "color": "Beyaz",
+            "price_per_meter": 2.5,
+            "stock_meters": 500
+        },
+        {
+            "id": "edge_002",
+            "name": "0.8mm Siyah PVC",
+            "thickness": 0.8,
+            "width": 22,
+            "color": "Siyah",
+            "price_per_meter": 2.8,
+            "stock_meters": 300
+        },
+        {
+            "id": "edge_003",
+            "name": "2mm Meşe ABS",
+            "thickness": 2,
+            "width": 22,
+            "color": "Meşe",
+            "price_per_meter": 5.5,
+            "stock_meters": 200
+        }
+    ],
+    "material_categories": [
+        {
+            "id": "mdf",
+            "name": "MDF",
+            "icon": "fa-square"
+        },
+        {
+            "id": "suntalam",
+            "name": "Suntalam",
+            "icon": "fa-th-large"
+        },
+        {
+            "id": "kontraplak",
+            "name": "Kontraplak",
+            "icon": "fa-layer-group"
+        },
+        {
+            "id": "osb",
+            "name": "OSB",
+            "icon": "fa-cubes"
+        },
+        {
+            "id": "lam_mdf",
+            "name": "Lake MDF",
+            "icon": "fa-sparkles"
+        },
+        {
+            "id": "pvc",
+            "name": "PVC/Akrilik",
+            "icon": "fa-gem"
+        }
+    ],
+    "nesting_projects": []
+}
