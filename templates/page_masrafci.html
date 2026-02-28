@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Masrafçı | Mazzel OS{% endblock %}
+
+{% block extra_css %}
+{% for css_file in masrafci_css %}
+<link rel="stylesheet" href="{{ css_file }}">
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<div id="masrafci-root"></div>
+
+<script>
+(function() {
+  var root = document.getElementById('masrafci-root');
+  if (!root) return;
+
+  function syncTheme() {
+    var theme = document.body.getAttribute('data-theme') || 'light';
+    var isDark = theme.indexOf('dark') !== -1;
+    if (isDark) {
+      root.classList.add('masrafci-dark');
+    } else {
+      root.classList.remove('masrafci-dark');
+    }
+  }
+
+  syncTheme();
+
+  var observer = new MutationObserver(function(mutations) {
+    for (var i = 0; i < mutations.length; i++) {
+      if (mutations[i].attributeName === 'data-theme') {
+        syncTheme();
+        break;
+      }
+    }
+  });
+  observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ masrafci_js }}"></script>
+{% endblock %}

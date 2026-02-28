@@ -1,29 +1,59 @@
 ﻿from flask import Flask, render_template, redirect, url_for, session, request, jsonify
+from flask import Response
 from functools import wraps
+from datetime import timedelta, date, datetime
 import os
 import json
+import sqlite3
 import subprocess
 import time
 import threading
-from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen, Request as UrlRequest
+from urllib.parse import quote
 
 app = Flask(__name__)
-app.secret_key = 'mazzel-secret-key-2025'
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.environ.get('MAZZEL_DATA_DIR', os.path.join(BASE_DIR, 'data'))
+
+SETTINGS_FILE = os.environ.get('MAZZEL_SETTINGS_FILE', os.path.join(DATA_DIR, 'settings.json'))
+NESTING_DATA_FILE = os.environ.get('MAZZEL_NESTING_DATA_FILE', os.path.join(DATA_DIR, 'nesting_data.json'))
+
+TOKIDB_BASE_URL = os.environ.get('TOKIDB_BASE_URL', 'http://127.0.0.1:3001').rstrip('/')
+TOKIDB_TIMEOUT_SEC = float(os.environ.get('TOKIDB_TIMEOUT_SEC', '10'))
+TOKIDB_INTERNAL_TOKEN = os.environ.get('TOKIDB_INTERNAL_TOKEN')
+
+app.secret_key = os.environ.get('MAZZEL_SECRET_KEY', 'mazzel-secret-key-2025')
+
+# Optional: persist the session cookie across browser/PC restarts.
+_session_permanent_raw = (os.environ.get('MAZZEL_SESSION_PERMANENT') or '').lower().strip()
+MAZZEL_SESSION_PERMANENT = _session_permanent_raw in ('1', 'true', 'yes', 'on')
+try:
+    MAZZEL_SESSION_DAYS = int(os.environ.get('MAZZEL_SESSION_DAYS', '7'))
+except Exception:
+    MAZZEL_SESSION_DAYS = 7
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=max(1, MAZZEL_SESSION_DAYS))
 
 # Basit kullanici
-USERS = {"admin": "mazzel2025"}
+_admin_user = os.environ.get('MAZZEL_ADMIN_USER', 'admin')
+_admin_password = os.environ.get('MAZZEL_ADMIN_PASSWORD', 'mazzel2025')
+USERS = {_admin_user: _admin_password}
 
 # Login decorator
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
+            # For API requests, return JSON 401 instead of redirecting to the login HTML.
+            # This prevents frontend fetch() calls from receiving HTML (302->/login) and breaking JSON parsing.
+            if request.path.startswith('/api/'):
+                return jsonify({'error': 'Unauthorized'}), 401
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
-# Ayarlar dosyasi
-SETTINGS_FILE = '/opt/mazzel/gateway/settings.json'
+# Ayarlar dosyasi: SETTINGS_FILE env ile override edilebilir.
 
 # TETRA local autostart (Windows only)
 TETRA_URL_DEFAULT = 'http://localhost:5173/'
@@ -83,17 +113,18 @@ def load_settings():
     default_settings = {
         "theme": "dark",
         "site_title": "Mazzel Works Portal",
-        "site_subtitle": "Profesyonel iÅŸ yÃ¶netimi, teklif hazÄ±rlama ve maliyet analizi iÃ§in tek platform",
+        "site_subtitle": "Profesyonel iş yönetimi, teklif hazırlama ve maliyet analizi için tek platform",
         "show_weather": True,
         "show_currency": True,
         "show_news": True,
         "show_clock": True,
         "weather_city": "Istanbul",
         "modules": [
-            {"id": "teklif", "name": "Teklif HazÄ±rla", "icon": "fa-file-invoice-dollar", "url": "/teklif/", "status": "active", "enabled": True},
+            {"id": "teklif", "name": "Teklif Hazırla", "icon": "fa-file-invoice-dollar", "url": "/teklif/", "status": "active", "enabled": True},
             {"id": "mail", "name": "Mazzel Mail", "icon": "fa-envelope", "url": "/mail/", "status": "dev", "enabled": True},
             {"id": "maliyet", "name": "Maliyet Hesapla", "icon": "fa-calculator", "url": "/maliyet/", "status": "soon", "enabled": True},
-            {"id": "musteriler", "name": "MÃ¼ÅŸteriler", "icon": "fa-users", "url": "/musteriler/", "status": "soon", "enabled": True},
+            {"id": "tokidb", "name": "TOKI DB", "icon": "fa-database", "url": "/tokidb/", "status": "active", "enabled": True},
+            {"id": "musteriler", "name": "Müşteriler", "icon": "fa-users", "url": "/musteriler/", "status": "soon", "enabled": True},
             {"id": "raporlar", "name": "Raporlar", "icon": "fa-chart-bar", "url": "/raporlar/", "status": "soon", "enabled": True},
             {"id": "ayarlar", "name": "Ayarlar", "icon": "fa-cog", "url": "/settings", "status": "active", "enabled": True}
         ],
@@ -101,7 +132,7 @@ def load_settings():
             {"name": "Ana Sayfa", "url": "/", "enabled": True},
             {"name": "Hizmetler", "url": "/hizmetler", "enabled": True},
             {"name": "Referanslar", "url": "/referanslar", "enabled": True},
-            {"name": "Ä°letiÅŸim", "url": "/iletisim", "enabled": True}
+            {"name": "İletişim", "url": "/iletisim", "enabled": True}
         ],
         "notifications": []
     }
@@ -116,11 +147,117 @@ def load_settings():
 
 def save_settings(settings):
     try:
+        os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
         with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
             json.dump(settings, f, ensure_ascii=False, indent=2)
         return True
     except:
         return False
+
+# ── Vite manifest loader for masrafci ──────────────────────────
+_masrafci_manifest_cache = None
+_masrafci_manifest_cache_mtime = None
+
+def _load_masrafci_manifest():
+    """Load Vite manifest for the masrafci app. Returns dict with 'js' and 'css' keys, or None."""
+    global _masrafci_manifest_cache, _masrafci_manifest_cache_mtime
+
+    manifest_path = os.path.join(BASE_DIR, 'static', 'apps', 'masrafci', '.vite', 'manifest.json')
+    if not os.path.exists(manifest_path):
+        _masrafci_manifest_cache = None
+        _masrafci_manifest_cache_mtime = None
+        return None
+
+    # In production mode, cache until manifest mtime changes.
+    manifest_mtime = os.path.getmtime(manifest_path)
+    if (
+        not app.debug
+        and _masrafci_manifest_cache is not None
+        and _masrafci_manifest_cache_mtime == manifest_mtime
+    ):
+        return _masrafci_manifest_cache
+
+    try:
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            manifest = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        _masrafci_manifest_cache = None
+        _masrafci_manifest_cache_mtime = None
+        return None
+
+    entry = None
+    for value in manifest.values():
+        if isinstance(value, dict) and value.get('isEntry'):
+            entry = value
+            break
+    if entry is None:
+        return None
+
+    prefix = 'apps/masrafci/'
+    result = {
+        'js': url_for('static', filename=prefix + entry['file']),
+        'css': [url_for('static', filename=prefix + c) for c in entry.get('css', [])],
+    }
+    _masrafci_manifest_cache = result
+    _masrafci_manifest_cache_mtime = manifest_mtime
+    return result
+
+
+def _proxy_url(url, timeout=TOKIDB_TIMEOUT_SEC):
+    method = request.method.upper()
+    body = None
+    if method not in ('GET', 'HEAD'):
+        body = request.get_data() or b''
+
+    headers = {}
+    # Forward only the minimal set of headers we need.
+    for name in ('Content-Type', 'Accept'):
+        if name in request.headers:
+            headers[name] = request.headers[name]
+    if TOKIDB_INTERNAL_TOKEN:
+        headers['X-TOKIDB-INTERNAL-TOKEN'] = TOKIDB_INTERNAL_TOKEN
+
+    upstream_req = UrlRequest(url, data=body, headers=headers, method=method)
+
+    def _build_response(status, payload, upstream_headers):
+        resp = Response(payload, status=status)
+        hop_by_hop = {
+            'connection',
+            'keep-alive',
+            'proxy-authenticate',
+            'proxy-authorization',
+            'te',
+            'trailers',
+            'transfer-encoding',
+            'upgrade',
+            'content-length',
+        }
+        if upstream_headers:
+            for key, value in upstream_headers.items():
+                if key.lower() in hop_by_hop:
+                    continue
+                resp.headers[key] = value
+        return resp
+
+    try:
+        with urlopen(upstream_req, timeout=timeout) as upstream_resp:
+            return _build_response(
+                upstream_resp.status,
+                upstream_resp.read(),
+                upstream_resp.headers,
+            )
+    except HTTPError as e:
+        try:
+            payload = e.read()
+        except Exception:
+            payload = b''
+        return _build_response(e.code, payload, getattr(e, 'headers', None))
+    except URLError as e:
+        return jsonify({
+            'success': False,
+            'error': 'Upstream unavailable',
+            'details': str(e),
+        }), 502
 
 @app.route('/')
 def index():
@@ -137,8 +274,10 @@ def login():
         password = request.form.get('password')
         if USERS.get(username) == password:
             session['user'] = username
+            if MAZZEL_SESSION_PERMANENT:
+                session.permanent = True
             return redirect(url_for('dashboard'))
-        return render_template('login.html', error="HatalÄ± kullanÄ±cÄ± adÄ± veya ÅŸifre", settings=settings)
+        return render_template('login.html', error="Hatalı kullanıcı adı veya şifre", settings=settings)
     return render_template('login.html', settings=settings)
 
 @app.route('/dashboard')
@@ -206,10 +345,25 @@ def add_notification():
     save_settings(settings)
     return jsonify({'success': True})
 
+@app.route('/api/tokidb/health', methods=['GET'])
+@login_required
+def tokidb_health():
+    return _proxy_url(f"{TOKIDB_BASE_URL}/health")
+
+@app.route('/api/tokidb/<path:subpath>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+@login_required
+def tokidb_api_proxy(subpath):
+    # Flask decodes path params, so re-encode to preserve spaces/Turkish chars safely.
+    encoded_subpath = quote(subpath.lstrip('/'), safe='/')
+    target_url = f"{TOKIDB_BASE_URL}/api/{encoded_subpath}"
+    if request.query_string:
+        target_url = f"{target_url}?{request.query_string.decode('utf-8', errors='ignore')}"
+    return _proxy_url(target_url)
+
 @app.route('/tetra/')
 @login_required
 def tetra():
-    """TETRA AI MÃ¼nazara sistemi - standalone sayfaya yÃ¶nlendir"""
+    """TETRA AI Münazara sistemi - standalone sayfaya yönlendir"""
     # Local: http://localhost:5173/
     # Production: /tetra-app/
     tetra_url = os.environ.get('TETRA_URL', TETRA_URL_DEFAULT)
@@ -255,7 +409,7 @@ def logout():
 def teklif():
     if 'user' not in session:
         return redirect(url_for('login'))
-    return render_template('module_placeholder.html', user=session['user'], module_name="Teklif HazÄ±rlama", module_icon="fa-file-invoice-dollar", active_page='teklif')
+    return render_template('module_placeholder.html', user=session['user'], module_name="Teklif Hazırlama", module_icon="fa-file-invoice-dollar", active_page='teklif')
 
 @app.route('/mail/')
 @login_required
@@ -265,13 +419,67 @@ def mail():
 @app.route('/maliyet/')
 @login_required
 def maliyet():
-    return render_template('module_placeholder.html', 
-                         module_name="Maliyet Hesaplama", 
+    return render_template('module_placeholder.html',
+                         module_name="Maliyet Hesaplama",
                          module_icon="fa-calculator",
                          active_page='maliyet',
                          user=session.get('user'))
 
-NESTING_DATA_FILE = '/opt/mazzel/gateway/data/nesting_data.json'
+@app.route('/masrafci/')
+@login_required
+def masrafci():
+    manifest = _load_masrafci_manifest()
+    if manifest is None:
+        return render_template('module_placeholder.html',
+                             module_name="Masrafçı",
+                             module_icon="fa-wallet",
+                             active_page='masrafci',
+                             user=session.get('user'))
+    return render_template('page_masrafci.html',
+                         active_page='masrafci',
+                         user=session.get('user'),
+                         masrafci_js=manifest['js'],
+                         masrafci_css=manifest['css'])
+
+@app.route('/tokidb/')
+@login_required
+def tokidb_dashboard():
+    return render_template('tokidb/dashboard.html', user=session['user'], active_page='tokidb')
+
+@app.route('/tokidb/projects')
+@login_required
+def tokidb_projects():
+    return render_template('tokidb/projects.html', user=session['user'], active_page='tokidb_projects')
+
+@app.route('/tokidb/projects/<toki_id>')
+@login_required
+def tokidb_project_detail(toki_id):
+    return render_template('tokidb/project_detail.html', user=session['user'], active_page='tokidb_projects', toki_id=toki_id)
+
+@app.route('/tokidb/cities')
+@login_required
+def tokidb_cities():
+    return render_template('tokidb/cities.html', user=session['user'], active_page='tokidb_cities')
+
+@app.route('/tokidb/companies')
+@login_required
+def tokidb_companies():
+    return render_template('tokidb/companies.html', user=session['user'], active_page='tokidb_companies')
+
+@app.route('/tokidb/companies/<name>')
+@login_required
+def tokidb_company_detail(name):
+    return render_template('tokidb/company_detail.html', user=session['user'], active_page='tokidb_companies', company_name=name)
+
+@app.route('/tokidb/watchlist')
+@login_required
+def tokidb_watchlist():
+    return render_template('tokidb/watchlist.html', user=session['user'], active_page='tokidb_watchlist')
+
+@app.route('/tokidb/admin')
+@login_required
+def tokidb_admin():
+    return render_template('tokidb/admin.html', user=session['user'], active_page='tokidb_admin')
 
 def load_nesting_data():
     default_data = {"customers": [], "materials": [], "nesting_projects": []}
@@ -532,8 +740,508 @@ def iletisim():
     settings = load_settings()
     return render_template('page_iletisim.html', settings=settings)
 
+# ── Masrafci SQLite Backend ──────────────────────────────────
+MASRAFCI_DB_PATH = os.path.join(DATA_DIR, 'masrafci.db')
+
+_MASRAFCI_ALLOWED_FIELDS = {
+    'type', 'ad', 'tutar', 'ay', 'tarih', 'kategori', 'kurum',
+    'odeme_yontemi', 'son_odeme', 'durum', 'taksit_sayisi',
+    'taksit_odenen', 'aylik_tutar', 'kart', 'otomatik_odeme',
+    'telefon', 'iban', 'notlar', 'abone_no',
+}
+
+def _get_masrafci_db():
+    os.makedirs(os.path.dirname(MASRAFCI_DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(MASRAFCI_DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT NOT NULL,
+            type TEXT NOT NULL CHECK(type IN ('harcama','fatura','kredikarti','alacakli')),
+            ad TEXT NOT NULL,
+            tutar REAL DEFAULT 0,
+            ay TEXT,
+            tarih TEXT,
+            kategori TEXT,
+            kurum TEXT,
+            odeme_yontemi TEXT,
+            son_odeme TEXT,
+            durum TEXT DEFAULT 'odenmedi',
+            taksit_sayisi INTEGER,
+            taksit_odenen INTEGER DEFAULT 0,
+            aylik_tutar REAL,
+            kart TEXT,
+            otomatik_odeme INTEGER DEFAULT 0,
+            telefon TEXT,
+            iban TEXT,
+            notlar TEXT,
+            abone_no TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        )
+    """)
+    try:
+        conn.execute("ALTER TABLE records ADD COLUMN abone_no TEXT")
+    except sqlite3.OperationalError:
+        pass  # kolon zaten var
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS bill_reminder_rules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT NOT NULL,
+            provider_key TEXT NOT NULL,
+            display_name TEXT NOT NULL,
+            enabled INTEGER DEFAULT 1,
+            expected_start_day INTEGER NOT NULL DEFAULT 1 CHECK(expected_start_day BETWEEN 1 AND 28),
+            expected_end_day INTEGER NOT NULL DEFAULT 28 CHECK(expected_end_day BETWEEN 1 AND 28),
+            lead_days INTEGER NOT NULL DEFAULT 3 CHECK(lead_days BETWEEN 0 AND 14),
+            last_prompted_month TEXT,
+            snooze_until TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime')),
+            UNIQUE(user, provider_key)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS bill_reminder_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rule_id INTEGER NOT NULL REFERENCES bill_reminder_rules(id) ON DELETE CASCADE,
+            month TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending'
+                CHECK(status IN ('pending','prompted','entered','skipped_month','dismissed')),
+            prompted_at TEXT,
+            answered_at TEXT,
+            linked_record_id INTEGER REFERENCES records(id) ON DELETE SET NULL,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            UNIQUE(rule_id, month)
+        )
+    """)
+    return conn
+
+def _row_to_dict(row):
+    d = dict(row)
+    d['otomatik_odeme'] = bool(d.get('otomatik_odeme'))
+    return d
+
+
+def _normalize_provider_key(raw: str) -> str:
+    _TR_MAP = str.maketrans({
+        '\u00e7': 'c', '\u00c7': 'c',  # ç, Ç
+        '\u015f': 's', '\u015e': 's',  # ş, Ş
+        '\u011f': 'g', '\u011e': 'g',  # ğ, Ğ
+        '\u00fc': 'u', '\u00dc': 'u',  # ü, Ü
+        '\u00f6': 'o', '\u00d6': 'o',  # ö, Ö
+        '\u0131': 'i', '\u0130': 'i',  # ı, İ
+    })
+    text = (raw or '').strip().lower().translate(_TR_MAP)
+    return ' '.join(text.split())
+
+
+def _run_reminder_check(conn, user, month):
+    today = date.today()
+    today_day = today.day
+    today_iso = today.isoformat()
+
+    rules = conn.execute(
+        "SELECT * FROM bill_reminder_rules WHERE user = ? AND enabled = 1",
+        (user,)
+    ).fetchall()
+
+    fatura_records = conn.execute(
+        "SELECT kurum FROM records WHERE user = ? AND type = 'fatura' AND ay = ?",
+        (user, month)
+    ).fetchall()
+    fatura_keys = {_normalize_provider_key(r['kurum'] or '') for r in fatura_records}
+
+    for rule in rules:
+        provider_key = rule['provider_key']
+
+        # Bu ay icin fatura zaten girilmis mi?
+        if provider_key in fatura_keys:
+            continue
+
+        # Gun araligi kontrolu (lead_days dahil)
+        start_day = max(1, rule['expected_start_day'] - rule['lead_days'])
+        end_day = rule['expected_end_day']
+        if not (start_day <= today_day <= end_day):
+            continue
+
+        # Snooze kontrolu
+        snooze = rule['snooze_until']
+        if snooze and snooze > today_iso:
+            continue
+
+        # Bu rule+month icin event var mi?
+        existing = conn.execute(
+            "SELECT id FROM bill_reminder_events WHERE rule_id = ? AND month = ?",
+            (rule['id'], month)
+        ).fetchone()
+        if existing:
+            continue
+
+        # Yeni pending event olustur
+        conn.execute(
+            "INSERT INTO bill_reminder_events (rule_id, month, status) VALUES (?, ?, 'pending')",
+            (rule['id'], month)
+        )
+
+    conn.commit()
+
+    # Tum pending event'leri don (rule bilgileriyle birlikte)
+    rows = conn.execute("""
+        SELECT e.*, r.display_name, r.provider_key, r.expected_start_day, r.expected_end_day
+        FROM bill_reminder_events e
+        JOIN bill_reminder_rules r ON e.rule_id = r.id
+        WHERE r.user = ? AND e.month = ? AND e.status = 'pending'
+        ORDER BY r.expected_start_day ASC
+    """, (user, month)).fetchall()
+    return [dict(r) for r in rows]
+
+@app.route('/api/masrafci/records', methods=['GET'])
+@login_required
+def masrafci_records_list():
+    record_type = request.args.get('type')
+    month = request.args.get('month')
+    conn = _get_masrafci_db()
+    try:
+        clauses = ['user = ?']
+        params = [session['user']]
+        if record_type:
+            clauses.append('type = ?')
+            params.append(record_type)
+        if month:
+            clauses.append('ay = ?')
+            params.append(month)
+        sql = f"SELECT * FROM records WHERE {' AND '.join(clauses)} ORDER BY created_at DESC"
+        rows = conn.execute(sql, params).fetchall()
+        return jsonify([_row_to_dict(r) for r in rows])
+    finally:
+        conn.close()
+
+@app.route('/api/masrafci/records', methods=['POST'])
+@login_required
+def masrafci_records_create():
+    data = request.get_json(silent=True) or {}
+    ad = (data.get('ad') or '').strip()
+    record_type = data.get('type', '')
+    if not ad:
+        return jsonify({'error': 'ad alanı zorunludur'}), 400
+    if record_type not in ('harcama', 'fatura', 'kredikarti', 'alacakli'):
+        return jsonify({'error': 'Geçersiz kayıt tipi'}), 400
+
+    filtered = {k: data[k] for k in _MASRAFCI_ALLOWED_FIELDS if k in data}
+    filtered['user'] = session['user']
+    if 'otomatik_odeme' in filtered:
+        filtered['otomatik_odeme'] = 1 if filtered['otomatik_odeme'] else 0
+
+    cols = list(filtered.keys())
+    placeholders = ', '.join(['?'] * len(cols))
+    col_names = ', '.join(cols)
+    values = [filtered[c] for c in cols]
+
+    conn = _get_masrafci_db()
+    try:
+        cur = conn.execute(f"INSERT INTO records ({col_names}) VALUES ({placeholders})", values)
+        conn.commit()
+        return jsonify({'success': True, 'id': cur.lastrowid}), 201
+    finally:
+        conn.close()
+
+@app.route('/api/masrafci/records/<int:record_id>', methods=['DELETE'])
+@login_required
+def masrafci_records_delete(record_id):
+    conn = _get_masrafci_db()
+    try:
+        row = conn.execute("SELECT user FROM records WHERE id = ?", (record_id,)).fetchone()
+        if row is None:
+            return jsonify({'error': 'Kayıt bulunamadı'}), 404
+        if row['user'] != session['user']:
+            return jsonify({'error': 'Yetkiniz yok'}), 403
+        conn.execute("DELETE FROM records WHERE id = ?", (record_id,))
+        conn.commit()
+        return jsonify({'success': True})
+    finally:
+        conn.close()
+
+@app.route('/api/masrafci/summary', methods=['GET'])
+@login_required
+def masrafci_summary():
+    month = request.args.get('month')
+    user = session['user']
+    conn = _get_masrafci_db()
+    try:
+        params_base = [user]
+        month_clause = ''
+        if month:
+            month_clause = ' AND ay = ?'
+            params_base.append(month)
+
+        # Toplam gider
+        row = conn.execute(
+            f"SELECT COALESCE(SUM(tutar), 0) AS total FROM records WHERE user = ?{month_clause}",
+            params_base
+        ).fetchone()
+        toplam_gider = row['total']
+
+        # Kategori dağılımı
+        rows = conn.execute(
+            f"SELECT kategori, SUM(tutar) AS total, COUNT(*) AS cnt FROM records WHERE user = ?{month_clause} GROUP BY kategori ORDER BY total DESC",
+            params_base
+        ).fetchall()
+        kategori_dagilimi = [{'kategori': r['kategori'] or 'Belirtilmemiş', 'toplam': r['total'], 'adet': r['cnt']} for r in rows]
+
+        # Yaklaşan faturalar (ödenmemiş)
+        fatura_params = [user]
+        fatura_month = ''
+        if month:
+            fatura_month = ' AND ay = ?'
+            fatura_params.append(month)
+        faturalar = conn.execute(
+            f"SELECT * FROM records WHERE user = ? AND type = 'fatura' AND durum != 'odendi'{fatura_month} ORDER BY son_odeme ASC LIMIT 5",
+            fatura_params
+        ).fetchall()
+
+        # Aktif taksitler
+        taksit_params = [user]
+        taksit_month = ''
+        if month:
+            taksit_month = ' AND ay = ?'
+            taksit_params.append(month)
+        taksitler = conn.execute(
+            f"SELECT * FROM records WHERE user = ? AND type = 'kredikarti' AND taksit_sayisi > 0{taksit_month} ORDER BY created_at DESC LIMIT 5",
+            taksit_params
+        ).fetchall()
+
+        # Son işlemler
+        son_params = [user]
+        son_month = ''
+        if month:
+            son_month = ' AND ay = ?'
+            son_params.append(month)
+        son_islemler = conn.execute(
+            f"SELECT * FROM records WHERE user = ?{son_month} ORDER BY created_at DESC LIMIT 10",
+            son_params
+        ).fetchall()
+
+        # Pending reminder sayisi
+        pending_count = conn.execute(
+            """SELECT COUNT(*) AS cnt FROM bill_reminder_events e
+               JOIN bill_reminder_rules r ON e.rule_id = r.id
+               WHERE r.user = ? AND e.month = ? AND e.status = 'pending'""",
+            (user, month or getCurrentMonth())
+        ).fetchone()['cnt']
+
+        return jsonify({
+            'toplam_gider': toplam_gider,
+            'kategori_dagilimi': kategori_dagilimi,
+            'yaklasan_faturalar': [_row_to_dict(r) for r in faturalar],
+            'aktif_taksitler': [_row_to_dict(r) for r in taksitler],
+            'son_islemler': [_row_to_dict(r) for r in son_islemler],
+            'pending_reminders': pending_count,
+        })
+    finally:
+        conn.close()
+
+
+def getCurrentMonth():
+    now = date.today()
+    return f"{now.year}-{now.month:02d}"
+
+
+# ── Reminder API Endpoints ──────────────────────────────────
+
+@app.route('/api/masrafci/reminder-rules', methods=['GET'])
+@login_required
+def masrafci_reminder_rules_list():
+    conn = _get_masrafci_db()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM bill_reminder_rules WHERE user = ? ORDER BY display_name ASC",
+            (session['user'],)
+        ).fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            d['enabled'] = bool(d.get('enabled'))
+            result.append(d)
+        return jsonify(result)
+    finally:
+        conn.close()
+
+
+@app.route('/api/masrafci/reminder-rules', methods=['POST'])
+@login_required
+def masrafci_reminder_rules_create():
+    data = request.get_json(silent=True) or {}
+    display_name = (data.get('display_name') or '').strip()
+    if not display_name:
+        return jsonify({'error': 'display_name zorunludur'}), 400
+
+    provider_key = _normalize_provider_key(display_name)
+    if not provider_key:
+        return jsonify({'error': 'Geçersiz kurum adı'}), 400
+
+    expected_start_day = data.get('expected_start_day', 1)
+    expected_end_day = data.get('expected_end_day', 28)
+    lead_days = data.get('lead_days', 3)
+
+    conn = _get_masrafci_db()
+    try:
+        conn.execute(
+            """INSERT INTO bill_reminder_rules
+               (user, provider_key, display_name, expected_start_day, expected_end_day, lead_days)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (session['user'], provider_key, display_name, expected_start_day, expected_end_day, lead_days)
+        )
+        conn.commit()
+        return jsonify({'success': True, 'provider_key': provider_key}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({'error': 'Bu kurum için hatırlatıcı zaten mevcut'}), 409
+    finally:
+        conn.close()
+
+
+@app.route('/api/masrafci/reminder-rules/<int:rule_id>', methods=['PATCH'])
+@login_required
+def masrafci_reminder_rules_update(rule_id):
+    data = request.get_json(silent=True) or {}
+    conn = _get_masrafci_db()
+    try:
+        rule = conn.execute(
+            "SELECT * FROM bill_reminder_rules WHERE id = ? AND user = ?",
+            (rule_id, session['user'])
+        ).fetchone()
+        if not rule:
+            return jsonify({'error': 'Kural bulunamadı'}), 404
+
+        allowed = {'display_name', 'enabled', 'expected_start_day', 'expected_end_day', 'lead_days', 'snooze_until'}
+        sets = []
+        params = []
+        for key in allowed:
+            if key in data:
+                val = data[key]
+                if key == 'enabled':
+                    val = 1 if val else 0
+                if key == 'display_name':
+                    pkey = _normalize_provider_key(val)
+                    sets.append('provider_key = ?')
+                    params.append(pkey)
+                sets.append(f'{key} = ?')
+                params.append(val)
+        if not sets:
+            return jsonify({'error': 'Güncellenecek alan yok'}), 400
+
+        sets.append("updated_at = datetime('now','localtime')")
+        params.extend([rule_id, session['user']])
+        conn.execute(
+            f"UPDATE bill_reminder_rules SET {', '.join(sets)} WHERE id = ? AND user = ?",
+            params
+        )
+        conn.commit()
+        return jsonify({'success': True})
+    finally:
+        conn.close()
+
+
+@app.route('/api/masrafci/reminders', methods=['GET'])
+@login_required
+def masrafci_reminders_list():
+    month = request.args.get('month', getCurrentMonth())
+    conn = _get_masrafci_db()
+    try:
+        rows = conn.execute("""
+            SELECT e.*, r.display_name, r.provider_key, r.expected_start_day, r.expected_end_day
+            FROM bill_reminder_events e
+            JOIN bill_reminder_rules r ON e.rule_id = r.id
+            WHERE r.user = ? AND e.month = ?
+            ORDER BY r.expected_start_day ASC
+        """, (session['user'], month)).fetchall()
+        return jsonify([dict(r) for r in rows])
+    finally:
+        conn.close()
+
+
+@app.route('/api/masrafci/reminders/<int:event_id>/action', methods=['POST'])
+@login_required
+def masrafci_reminder_action(event_id):
+    data = request.get_json(silent=True) or {}
+    action = data.get('action', '')
+    if action not in ('add_now', 'snooze_3d', 'skip_month', 'disable_rule'):
+        return jsonify({'error': 'Geçersiz aksiyon'}), 400
+
+    conn = _get_masrafci_db()
+    try:
+        event = conn.execute("""
+            SELECT e.*, r.display_name, r.provider_key, r.user
+            FROM bill_reminder_events e
+            JOIN bill_reminder_rules r ON e.rule_id = r.id
+            WHERE e.id = ?
+        """, (event_id,)).fetchone()
+        if not event or event['user'] != session['user']:
+            return jsonify({'error': 'Event bulunamadı'}), 404
+
+        now_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        if action == 'add_now':
+            conn.execute(
+                "UPDATE bill_reminder_events SET status = 'prompted', prompted_at = ? WHERE id = ?",
+                (now_str, event_id)
+            )
+            conn.commit()
+            return jsonify({
+                'success': True,
+                'redirect': 'add-record',
+                'display_name': event['display_name'],
+            })
+
+        elif action == 'snooze_3d':
+            snooze_date = (date.today() + timedelta(days=3)).isoformat()
+            conn.execute(
+                "UPDATE bill_reminder_rules SET snooze_until = ? WHERE id = ?",
+                (snooze_date, event['rule_id'])
+            )
+            conn.execute("DELETE FROM bill_reminder_events WHERE id = ?", (event_id,))
+            conn.commit()
+            return jsonify({'success': True})
+
+        elif action == 'skip_month':
+            conn.execute(
+                "UPDATE bill_reminder_events SET status = 'skipped_month', answered_at = ? WHERE id = ?",
+                (now_str, event_id)
+            )
+            conn.commit()
+            return jsonify({'success': True})
+
+        elif action == 'disable_rule':
+            conn.execute(
+                "UPDATE bill_reminder_rules SET enabled = 0 WHERE id = ?",
+                (event['rule_id'],)
+            )
+            conn.execute(
+                "UPDATE bill_reminder_events SET status = 'dismissed', answered_at = ? WHERE id = ?",
+                (now_str, event_id)
+            )
+            conn.commit()
+            return jsonify({'success': True})
+
+        return jsonify({'error': 'Bilinmeyen aksiyon'}), 400
+    finally:
+        conn.close()
+
+
+@app.route('/api/masrafci/reminder-check/run', methods=['POST'])
+@login_required
+def masrafci_reminder_check_run():
+    data = request.get_json(silent=True) or {}
+    month = data.get('month', getCurrentMonth())
+    conn = _get_masrafci_db()
+    try:
+        pending = _run_reminder_check(conn, session['user'], month)
+        return jsonify(pending)
+    finally:
+        conn.close()
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
-
-
-

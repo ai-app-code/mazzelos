@@ -36,6 +36,67 @@
         <a href="/tetra/" class="nav-item {% if active_page == 'tetra' %}active{% endif %}"><i class="fas fa-brain"></i>
             AI Münazara <span class="nav-badge new">BETA</span></a>
 
+        <!-- Masrafçı Alt Menü -->
+        <div class="nav-dropdown {% if active_page == 'masrafci' %}open{% endif %}">
+            <div class="nav-item nav-dropdown-toggle {% if active_page == 'masrafci' %}active{% endif %}">
+                <i class="fas fa-wallet"></i>
+                <span>Masrafçı</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            <div class="nav-dropdown-menu">
+                <a href="/masrafci/" class="nav-dropdown-item">
+                    <i class="fas fa-chart-pie"></i> Panel
+                </a>
+                <a href="/masrafci/?tab=faturalar" class="nav-dropdown-item">
+                    <i class="fas fa-file-invoice"></i> Faturalar
+                </a>
+                <a href="/masrafci/?tab=taksitler" class="nav-dropdown-item">
+                    <i class="fas fa-credit-card"></i> Taksitler
+                </a>
+                <a href="/masrafci/?tab=raporlar" class="nav-dropdown-item">
+                    <i class="fas fa-chart-bar"></i> Raporlar
+                </a>
+                <a href="/masrafci/?tab=gecmis" class="nav-dropdown-item">
+                    <i class="fas fa-history"></i> Geçmiş
+                </a>
+                <a href="/masrafci/?tab=ayarlar" class="nav-dropdown-item">
+                    <i class="fas fa-cog"></i> Ayarlar
+                </a>
+                <a href="/masrafci/?view=add-record" class="nav-dropdown-item">
+                    <i class="fas fa-plus-circle"></i> Yeni Kayıt
+                </a>
+            </div>
+        </div>
+
+        <!-- TOKI DB Alt Menü -->
+        <div class="nav-dropdown {% if active_page in ['tokidb', 'tokidb_projects', 'tokidb_cities', 'tokidb_companies', 'tokidb_watchlist', 'tokidb_admin'] %}open{% endif %}">
+            <div class="nav-item nav-dropdown-toggle {% if active_page in ['tokidb', 'tokidb_projects', 'tokidb_cities', 'tokidb_companies', 'tokidb_watchlist', 'tokidb_admin'] %}active{% endif %}">
+                <i class="fas fa-database"></i>
+                <span>TOKI DB</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </div>
+            <div class="nav-dropdown-menu">
+                <a href="/tokidb/" class="nav-dropdown-item {% if active_page == 'tokidb' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="/tokidb/projects" class="nav-dropdown-item {% if active_page == 'tokidb_projects' %}active{% endif %}">
+                    <i class="fas fa-building"></i> Projeler
+                </a>
+                <a href="/tokidb/cities" class="nav-dropdown-item {% if active_page == 'tokidb_cities' %}active{% endif %}">
+                    <i class="fas fa-city"></i> Şehirler
+                </a>
+                <a href="/tokidb/companies" class="nav-dropdown-item {% if active_page == 'tokidb_companies' %}active{% endif %}">
+                    <i class="fas fa-hard-hat"></i> Firmalar
+                </a>
+                <a href="/tokidb/watchlist" class="nav-dropdown-item {% if active_page == 'tokidb_watchlist' %}active{% endif %}">
+                    <i class="fas fa-eye"></i> Takip Listesi
+                </a>
+                <a href="/tokidb/admin" class="nav-dropdown-item {% if active_page == 'tokidb_admin' %}active{% endif %}">
+                    <i class="fas fa-cogs"></i> Sync Admin
+                </a>
+            </div>
+        </div>
+
         <a href="/maliyet/" class="nav-item {% if active_page == 'maliyet' %}active{% endif %}"><i
                 class="fas fa-calculator"></i> Maliyet Hesapla <span class="nav-badge soon">Yakında</span></a>
     </nav>
